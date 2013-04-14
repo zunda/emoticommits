@@ -50,9 +50,9 @@ next
 			url = c.js['html_url']
 		when 'FollowEvent'
 			next	# emotions, if there are, are not from the event
-		when 'FolkEvent'
+		when 'ForkEvent'
 			next	# emotions, if there are, are not from the event
-		when 'FolkApplyEvent'
+		when 'ForkApplyEvent'
 			next	# no example found for now. I will come back later
 		end
 
