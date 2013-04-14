@@ -34,4 +34,10 @@ module GitHubArchive
 			super("#{HOST}/repos/#{owner}/#{repo}/downloads/#{id}")
 		end
 	end
+
+	class  Gist < Api
+		def initialize(id)
+			super("#{HOST}/gists/#{id}")
+		end
+	end
 end

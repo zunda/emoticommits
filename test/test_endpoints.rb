@@ -30,3 +30,10 @@ class TestDownload < Test::Unit::TestCase
 		assert_equal("#{Api::HOST}/repos/zunda/test/downloads/1", t.url)
 	end
 end
+
+class TestGist < Test::Unit::TestCase
+	def test_url
+		t = Gist.new('1')
+		assert_equal("#{Api::HOST}/gists/1", t.url)
+	end
+end

@@ -54,6 +54,13 @@ next
 			next	# emotions, if there are, are not from the event
 		when 'ForkApplyEvent'
 			next	# no example found for now. I will come back later
+		when 'GistEvent'
+next
+			c = GitHubArchive::Gist.new(ev['payload']['id'])
+			c.read_and_parse
+			comment = c.js['description']
+			timestamp = c.timestamp
+			url = c.js['html_url']
 		end
 
 		next unless comment
