@@ -5,7 +5,7 @@ require 'yajl'
 
 $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'githubarchive/endpoints'
- 
+
 ARGV.each do |src|
 	js = open(src)
 	if src =~ /\.gz\Z/
@@ -23,21 +23,25 @@ ARGV.each do |src|
 
 		comment = nil
 		timestamp = nil
+		url = nil
 		case ev['type']
 		when 'CommitCommentEvent'
-#			c = GitHubArchive::SingleCommitComment.new(ev['repository']['owner'], ev['repository']['name'], ev['payload']['comment_id'])
-#			c.read_and_parse
-#			comment = c.js['body']
-#			timestamp = c.timestamp
+			c = GitHubArchive::SingleCommitComment.new(ev['repository']['owner'], ev['repository']['name'], ev['payload']['comment_id'])
+			c.read_and_parse
+			comment = c.js['body']
+			timestamp = c.timestamp
+			url = c.js['html_url']
+			puts "Comment:  #{comment}\nURL:       #{url}\nTimestamp: #{timestamp}"
+			exit	# safe guard
 		when 'CreateEvent'
 			comment = ev['payload']['description']
-			timestamp = ev['payload']['created_at']
+			timestamp = Time.parse(ev['created_at'])
+			url = ev['url']
 		when 'DeleteEvent'
 		when 'DownloadEvent'
 		end
 
 		next unless comment
-		puts comment
-		exit	# safe guard
+		puts "Comment:   #{comment}\nURL:       #{url}\nTimestamp: #{timestamp}"
 	end
 end
