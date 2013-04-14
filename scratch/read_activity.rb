@@ -61,6 +61,8 @@ next
 			comment = c.js['description']
 			timestamp = c.timestamp
 			url = c.js['html_url']
+		when 'GollumEvent'
+			next	# ignore for now
 		end
 
 		next unless comment
