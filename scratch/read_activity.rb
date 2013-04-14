@@ -50,6 +50,8 @@ next
 			url = c.js['html_url']
 		when 'FollowEvent'
 			next	# emotions, if there are, are not from the event
+		when 'FolkEvent'
+			next	# emotions, if there are, are not from the event
 		end
 
 		next unless comment
