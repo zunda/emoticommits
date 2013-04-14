@@ -52,6 +52,8 @@ next
 			next	# emotions, if there are, are not from the event
 		when 'FolkEvent'
 			next	# emotions, if there are, are not from the event
+		when 'FolkApplyEvent'
+			next	# no example found for now. I will come back later
 		end
 
 		next unless comment
