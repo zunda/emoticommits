@@ -22,11 +22,13 @@ ARGV.each do |src|
 		next unless avator
 
 		comment = nil
+		timestamp = nil
 		case ev['type']
 		when 'CommitCommentEvent'
 			c = GitHubArchive::SingleCommitComment.new(ev['repository']['owner'], ev['repository']['name'], ev['payload']['comment_id'])
 			c.read_and_parse
 			comment = c.js['body']
+			timestamp = c.timestamp
 		when 'CreateEvent'
 		when 'DeleteEvent'
 		when 'DownloadEvent'
