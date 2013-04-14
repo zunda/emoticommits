@@ -40,4 +40,10 @@ module GitHub
 			super("#{HOST}/gists/#{id}")
 		end
 	end
+
+	class SinglePullRequest < Api
+		def initialize(owner, repo, number)
+			super("#{HOST}/repos/#{owner}/#{repo}/pulls/#{number}")
+		end
+	end
 end

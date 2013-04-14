@@ -37,3 +37,10 @@ class TestGist < Test::Unit::TestCase
 		assert_equal("#{Api::HOST}/gists/1", t.url)
 	end
 end
+
+class TestSinglePullRequest < Test::Unit::TestCase
+	def test_url
+		t = SinglePullRequest.new('zunda', 'test', '1')
+		assert_equal("#{Api::HOST}/repos/zunda/test/pulls/1", t.url)
+	end
+end

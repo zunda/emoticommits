@@ -69,9 +69,17 @@ next
 			next	# emotions, if there are, are not from the event
 		when 'PublicEvent'
 			next	# emotions, if there are, are not from the event
+		when 'PullRequestEvent'
+next
+			c = GitHub::SinglePullRequest.new(ev['repository']['owner'], ev['repository']['name'], ev['payload']['number'])
+			c.read_and_parse
+			comment = c.js['body']
+			timestamp = c.timestamp
+			url = c.js['html_url']
 		end
 
 		next unless comment
 		puts "Comment:   #{comment}\nURL:       #{url}\nTimestamp: #{timestamp}"
+		exit
 	end
 end
