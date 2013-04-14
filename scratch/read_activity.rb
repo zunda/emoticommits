@@ -1,4 +1,5 @@
-# ruby scratch/read_activity.rb scratch/2013-04-12-11.json.gz 
+# ruby scratch/read_activity.rb ~/Dropbox/GitHub-Data-Challenge-II/*.json.gz
+
 require 'open-uri'
 require 'zlib'
 require 'yajl'
@@ -26,20 +27,27 @@ ARGV.each do |src|
 		url = nil
 		case ev['type']
 		when 'CommitCommentEvent'
+next
 			c = GitHubArchive::SingleCommitComment.new(ev['repository']['owner'], ev['repository']['name'], ev['payload']['comment_id'])
 			c.read_and_parse
 			comment = c.js['body']
 			timestamp = c.timestamp
 			url = c.js['html_url']
-			puts "Comment:  #{comment}\nURL:       #{url}\nTimestamp: #{timestamp}"
-			exit	# safe guard
+			puts "Comment:   #{comment}\nURL:       #{url}\nTimestamp: #{timestamp}"
 		when 'CreateEvent'
+next
 			comment = ev['payload']['description']
 			timestamp = Time.parse(ev['created_at'])
 			url = ev['url']
 		when 'DeleteEvent'
 			next	# nothing interesting
 		when 'DownloadEvent'
+next
+			c = GitHubArchive::Download.new(ev['repository']['owner'], ev['repository']['name'], ev['payload']['id'])
+			c.read_and_parse
+			comment = c.js['description']
+			timestamp = c.timestamp
+			url = c.js['html_url']
 		end
 
 		next unless comment
