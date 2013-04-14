@@ -34,9 +34,8 @@ ARGV.each do |src|
 		when 'DownloadEvent'
 		end
 
-		exit	# safe guard
-
 		next unless comment
 		puts comment
+		exit	# safe guard
 	end
 end
