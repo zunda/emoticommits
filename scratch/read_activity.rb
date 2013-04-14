@@ -76,6 +76,10 @@ next
 			comment = c.js['body']
 			timestamp = c.timestamp
 			url = c.js['html_url']
+		when 'PullRequestReviewCommentEvent'
+			comment = ev['payload']['comment']['body']
+			timestamp = Time.parse(ev['created_at'])
+			url = ev['payload']['comment']['html_url']
 		end
 
 		next unless comment
