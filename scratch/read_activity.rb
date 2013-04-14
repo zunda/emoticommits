@@ -48,6 +48,8 @@ next
 			comment = c.js['description']
 			timestamp = c.timestamp
 			url = c.js['html_url']
+		when 'FollowEvent'
+			next	# emotions, if there are, are not from the event
 		end
 
 		next unless comment
