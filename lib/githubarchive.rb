@@ -21,7 +21,9 @@ module GitHubArchive
 
 	class EventParser
 		# yeilds Event
-		def EventParser.parse(js, dry_run = false)
+		def EventParser.parse(js, opts = {dry_run: false, auth: {}})
+			dry_run = opts[:dry_run]
+
 			actor = js['actor_attributes']
 			return unless actor
 

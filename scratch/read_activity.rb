@@ -22,7 +22,7 @@ ARGV.each do |src|
 	end
 
 	Yajl::Parser.parse(js) do |ev|
-		GitHubArchive::EventParser.parse(ev, true) do |event|
+		GitHubArchive::EventParser.parse(ev, dry_run: true) do |event|
 			puts event.type
 		end
 	end
