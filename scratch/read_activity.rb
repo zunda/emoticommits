@@ -65,6 +65,8 @@ next
 			next	# could not find endpoint URL
 		when 'IssuesEvent'
 			next	# emotions, if there are, are not from the event
+		when 'MemberEvent'
+			next	# emotions, if there are, are not from the event
 		end
 
 		next unless comment
