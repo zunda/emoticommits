@@ -1,9 +1,9 @@
 require 'test/unit'
 
 $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
-require 'githubarchive/endpoints'
+require 'githubapi/endpoints'
 
-include GitHubArchive
+include GitHub
 
 class TestApi < Test::Unit::TestCase
 	def datapath(basename)

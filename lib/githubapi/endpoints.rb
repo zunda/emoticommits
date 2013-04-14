@@ -3,11 +3,11 @@
 require 'open-uri'
 require 'yajl'
 
-module GitHubArchive
+module GitHub
 	class Api
 		HOST = 'https://api.github.com'
 		VERSION = '0.0.0'
-		AGENT = "zunda@gmail.com - GitHubArchive - #{VERSION}"
+		AGENT = "zunda@gmail.com - GitHubApi - #{VERSION}"
 
 		attr_reader :url
 		attr_reader :js
