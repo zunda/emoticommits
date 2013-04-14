@@ -44,3 +44,10 @@ class TestSinglePullRequest < Test::Unit::TestCase
 		assert_equal("#{Api::HOST}/repos/zunda/test/pulls/1", t.url)
 	end
 end
+
+class TestCommit < Test::Unit::TestCase
+	def test_url
+		t = Commit.new('zunda', 'test', '1')
+		assert_equal("#{Api::HOST}/repos/zunda/test/commits/1", t.url)
+	end
+end

@@ -19,7 +19,7 @@ module GitHub
 
 		def read_and_parse
 			@js = Yajl::Parser.parse(open(@url, 'User-Agent' => AGENT).read)
-			@timestamp = Time.parse(@js['created_at'])
+			@timestamp = Time.parse(@js['created_at']) if @js['created_at']
 		end
 	end
 
@@ -44,6 +44,17 @@ module GitHub
 	class SinglePullRequest < Api
 		def initialize(owner, repo, number)
 			super("#{HOST}/repos/#{owner}/#{repo}/pulls/#{number}")
+		end
+	end
+
+	class Commit < Api
+		def initialize(owner, repo, sha)
+			super("#{HOST}/repos/#{owner}/#{repo}/commits/#{sha}")
+		end
+
+		def read_and_parse
+			super
+			@timestamp = Time.parse(@js['commit']['author']['date'])
 		end
 	end
 end

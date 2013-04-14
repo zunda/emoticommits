@@ -80,6 +80,15 @@ next
 			comment = ev['payload']['comment']['body']
 			timestamp = Time.parse(ev['created_at'])
 			url = ev['payload']['comment']['html_url']
+		when 'PushEvent'
+next
+			ev['payload']['shas'].each do |sha, email, message, name, distinct|
+				c = GitHub::Commit.new(ev['repository']['owner'], ev['repository']['name'], sha)
+				c.read_and_parse
+				comment = c.js['commit']['message']
+				timestamp = c.timestamp
+				url = c.js['html_url']
+			end
 		end
 
 		next unless comment
