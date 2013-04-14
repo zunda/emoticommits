@@ -7,13 +7,15 @@ module GitHubArchive
 		attr_reader :location	# String
 		attr_reader :url	# String
 		attr_reader :type	# String
+		attr_reader :gravatar_id	# String
 
-		def initialize(timestamp, comment, location, url, type)
+		def initialize(timestamp, comment, location, url, type, gravatar_id)
 			@timestamp = timestamp
 			@comment = comment
 			@location = location
 			@url = url
 			@type = type
+			@gravatar_id = gravatar_id
 		end
 	end
 
@@ -25,8 +27,8 @@ module GitHubArchive
 
 			loc = actor['location']
 			return unless loc
-			avator = actor['gravatar_id']
-			return unless avator
+			avatar = actor['gravatar_id']
+			return unless avatar
 
 			type = js['type']
 			case type
@@ -36,13 +38,13 @@ module GitHubArchive
 				comment = c.js['body']
 				timestamp = c.timestamp
 				url = c.js['html_url']
-				yield Event.new(timestamp, comment, loc, url, type)
+				yield Event.new(timestamp, comment, loc, url, type, avatar)
 				return
 			when 'CreateEvent'
 				comment = js['payload']['description']
 				timestamp = Time.parse(js['created_at'])
 				url = js['url']
-				yield Event.new(timestamp, comment, loc, url, type)
+				yield Event.new(timestamp, comment, loc, url, type, avatar)
 				return
 			when 'DeleteEvent'
 				return	# nothing interesting
@@ -52,7 +54,7 @@ module GitHubArchive
 				comment = c.js['description']
 				timestamp = c.timestamp
 				url = c.js['html_url']
-				yield Event.new(timestamp, comment, loc, url, type)
+				yield Event.new(timestamp, comment, loc, url, type, avatar)
 				return
 			when 'FollowEvent'
 				return	# emotions, if there are, are not from the event
@@ -66,7 +68,7 @@ module GitHubArchive
 				comment = c.js['description']
 				timestamp = c.timestamp
 				url = c.js['html_url']
-				yield Event.new(timestamp, comment, loc, url, type)
+				yield Event.new(timestamp, comment, loc, url, type, avatar)
 				return
 			when 'GollumEvent'
 				return	# ignore for now
@@ -84,13 +86,13 @@ module GitHubArchive
 				comment = c.js['body']
 				timestamp = c.timestamp
 				url = c.js['html_url']
-				yield Event.new(timestamp, comment, loc, url, type)
+				yield Event.new(timestamp, comment, loc, url, type, avatar)
 				return
 			when 'PullRequestReviewCommentEvent'
 				comment = js['payload']['comment']['body']
 				timestamp = Time.parse(js['created_at'])
 				url = js['payload']['comment']['html_url']
-				yield Event.new(timestamp, comment, loc, url, type)
+				yield Event.new(timestamp, comment, loc, url, type, avatar)
 				return
 			when 'PushEvent'
 				js['payload']['shas'].each do |sha, email, message, name, distinct|
@@ -99,7 +101,7 @@ module GitHubArchive
 					comment = c.js['commit']['message']
 					timestamp = c.timestamp
 					url = c.js['html_url']
-					yield Event.new(timestamp, comment, loc, url, type)
+					yield Event.new(timestamp, comment, loc, url, type, avatar)
 				end
 				return
 			when 'TeamAddEvent'

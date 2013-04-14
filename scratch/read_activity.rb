@@ -14,7 +14,10 @@ ARGV.each do |src|
 
 	Yajl::Parser.parse(js) do |ev|
 		GitHubArchive::EventParser.parse(ev) do |event|
-			puts "#{event.timestamp.strftime("%H:%M")} #{event.location} #{event.comment} #{event.url}"
+			puts "#{event.timestamp.strftime("%H:%M")} #{event.location}"
+			puts "#{event.url} #{event.gravatar_id}\n"
+			puts event.comment
+			puts
 		end
 	end
 end
