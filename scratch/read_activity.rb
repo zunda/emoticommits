@@ -4,7 +4,7 @@ require 'zlib'
 require 'yajl'
 
 $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
-require 'githubapi/endpoints'
+require 'githubarchive'
 
 ARGV.each do |src|
 	js = open(src)
@@ -13,90 +13,8 @@ ARGV.each do |src|
 	end
 
 	Yajl::Parser.parse(js) do |ev|
-		actor = ev['actor_attributes']
-		next unless actor
-
-		loc = actor['location']
-		next unless loc
-		avator = actor['gravatar_id']
-		next unless avator
-
-		comment = nil
-		timestamp = nil
-		url = nil
-		case ev['type']
-		when 'CommitCommentEvent'
-next
-			c = GitHub::SingleCommitComment.new(ev['repository']['owner'], ev['repository']['name'], ev['payload']['comment_id'])
-			c.read_and_parse
-			comment = c.js['body']
-			timestamp = c.timestamp
-			url = c.js['html_url']
-		when 'CreateEvent'
-next
-			comment = ev['payload']['description']
-			timestamp = Time.parse(ev['created_at'])
-			url = ev['url']
-		when 'DeleteEvent'
-			next	# nothing interesting
-		when 'DownloadEvent'
-next
-			c = GitHub::Download.new(ev['repository']['owner'], ev['repository']['name'], ev['payload']['id'])
-			c.read_and_parse
-			comment = c.js['description']
-			timestamp = c.timestamp
-			url = c.js['html_url']
-		when 'FollowEvent'
-			next	# emotions, if there are, are not from the event
-		when 'ForkEvent'
-			next	# emotions, if there are, are not from the event
-		when 'ForkApplyEvent'
-			next	# no example found for now. I will come back later
-		when 'GistEvent'
-next
-			c = GitHub::Gist.new(ev['payload']['id'])
-			c.read_and_parse
-			comment = c.js['description']
-			timestamp = c.timestamp
-			url = c.js['html_url']
-		when 'GollumEvent'
-			next	# ignore for now
-		when 'IssueCommentEvent'
-			next	# could not find endpoint URL
-		when 'IssuesEvent'
-			next	# emotions, if there are, are not from the event
-		when 'MemberEvent'
-			next	# emotions, if there are, are not from the event
-		when 'PublicEvent'
-			next	# emotions, if there are, are not from the event
-		when 'PullRequestEvent'
-next
-			c = GitHub::SinglePullRequest.new(ev['repository']['owner'], ev['repository']['name'], ev['payload']['number'])
-			c.read_and_parse
-			comment = c.js['body']
-			timestamp = c.timestamp
-			url = c.js['html_url']
-		when 'PullRequestReviewCommentEvent'
-			comment = ev['payload']['comment']['body']
-			timestamp = Time.parse(ev['created_at'])
-			url = ev['payload']['comment']['html_url']
-		when 'PushEvent'
-next
-			ev['payload']['shas'].each do |sha, email, message, name, distinct|
-				c = GitHub::Commit.new(ev['repository']['owner'], ev['repository']['name'], sha)
-				c.read_and_parse
-				comment = c.js['commit']['message']
-				timestamp = c.timestamp
-				url = c.js['html_url']
-			end
-		when 'TeamAddEvent'
-			next	# emotions, if there are, are not from the event
-		when 'WatchEvent'
-			next	# emotions, if there are, are not from the event
+		GitHubArchive::EventParser.parse(ev) do |event|
+			puts "#{event.timestamp.strftime("%H:%M")} #{event.location} #{event.comment} #{event.url}"
 		end
-
-		next unless comment
-		puts "Comment:   #{comment}\nURL:       #{url}\nTimestamp: #{timestamp}"
-		exit
 	end
 end
