@@ -25,11 +25,13 @@ ARGV.each do |src|
 		timestamp = nil
 		case ev['type']
 		when 'CommitCommentEvent'
-			c = GitHubArchive::SingleCommitComment.new(ev['repository']['owner'], ev['repository']['name'], ev['payload']['comment_id'])
-			c.read_and_parse
-			comment = c.js['body']
-			timestamp = c.timestamp
+#			c = GitHubArchive::SingleCommitComment.new(ev['repository']['owner'], ev['repository']['name'], ev['payload']['comment_id'])
+#			c.read_and_parse
+#			comment = c.js['body']
+#			timestamp = c.timestamp
 		when 'CreateEvent'
+			comment = ev['payload']['description']
+			timestamp = ev['payload']['created_at']
 		when 'DeleteEvent'
 		when 'DownloadEvent'
 		end
