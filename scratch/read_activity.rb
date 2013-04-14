@@ -63,6 +63,8 @@ next
 			next	# ignore for now
 		when 'IssueCommentEvent'
 			next	# could not find endpoint URL
+		when 'IssuesEvent'
+			next	# emotions, if there are, are not from the event
 		end
 
 		next unless comment
