@@ -28,4 +28,10 @@ module GitHubArchive
 			super("#{HOST}/repos/#{owner}/#{repo}/comments/#{comment_id}")
 		end
 	end
+
+	class Download < Api
+		def initialize(owner, repo, id)
+			super("#{HOST}/repos/#{owner}/#{repo}/downloads/#{id}")
+		end
+	end
 end

@@ -23,3 +23,10 @@ class TestSingleCommitComment < Test::Unit::TestCase
 		assert_equal("#{Api::HOST}/repos/zunda/test/comments/1", t.url)
 	end
 end
+
+class TestDownload < Test::Unit::TestCase
+	def test_url
+		t = Download.new('zunda', 'test', '1')
+		assert_equal("#{Api::HOST}/repos/zunda/test/downloads/1", t.url)
+	end
+end
