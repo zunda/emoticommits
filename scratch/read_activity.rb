@@ -15,6 +15,23 @@ require 'yajl'
 $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'githubarchive'
 
+# e.g.
+# @github_auth = ['username', 'password']
+class Configuration
+	def Configuration.load(path)
+		c = Configuration.new()
+		begin
+			c.instance_eval(File.read(path))
+		rescue SystemCallError
+		end
+		return c
+	end
+	
+	attr_reader :github_auth
+end
+
+conf = Configuration.load(File.join(ENV['HOME'], '.githubarchiverc'))
+
 ARGV.each do |src|
 	js = open(src)
 	if src =~ /\.gz\Z/
@@ -22,8 +39,13 @@ ARGV.each do |src|
 	end
 
 	Yajl::Parser.parse(js) do |ev|
-		GitHubArchive::EventParser.parse(ev, dry_run: true) do |event|
+		GitHubArchive::EventParser.parse(ev, dry_run: false, auth: conf.github_auth) do |event|
 			puts event.type
+			puts event.timestamp
+			puts event.location
+			puts event.gravatar_id
+			puts event.comment
+			puts
 		end
 	end
 end
