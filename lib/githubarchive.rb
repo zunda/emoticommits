@@ -21,7 +21,7 @@ module GitHubArchive
 
 	class EventParser
 		# yeilds Event
-		def EventParser.parse(js)
+		def EventParser.parse(js, dry_run = false)
 			actor = js['actor_attributes']
 			return unless actor
 
@@ -33,12 +33,14 @@ module GitHubArchive
 			type = js['type']
 			case type
 			when 'CommitCommentEvent'
-				c = GitHub::SingleCommitComment.new(js['repository']['owner'], js['repository']['name'], js['payload']['comment_id'])
-				c.read_and_parse
-				comment = c.js['body']
-				timestamp = c.timestamp
-				url = c.js['html_url']
-				yield Event.new(timestamp, comment, loc, url, type, avatar)
+				unless dry_run
+					c = GitHub::SingleCommitComment.new(js['repository']['owner'], js['repository']['name'], js['payload']['comment_id'])
+					c.read_and_parse
+					comment = c.js['body']
+					timestamp = c.timestamp
+					url = c.js['html_url']
+				end
+				yield Event.new(timestamp || Time.parse(js['created_at']), comment, loc, url, type, avatar)
 				return
 			when 'CreateEvent'
 				comment = js['payload']['description']
@@ -49,11 +51,13 @@ module GitHubArchive
 			when 'DeleteEvent'
 				return	# nothing interesting
 			when 'DownloadEvent'
-				c = GitHub::Download.new(js['repository']['owner'], js['repository']['name'], js['payload']['id'])
-				c.read_and_parse
-				comment = c.js['description']
-				timestamp = c.timestamp
-				url = c.js['html_url']
+				unless dry_run
+					c = GitHub::Download.new(js['repository']['owner'], js['repository']['name'], js['payload']['id'])
+					c.read_and_parse
+					comment = c.js['description']
+					timestamp = c.timestamp
+					url = c.js['html_url']
+				end
 				yield Event.new(timestamp, comment, loc, url, type, avatar)
 				return
 			when 'FollowEvent'
@@ -63,12 +67,14 @@ module GitHubArchive
 			when 'ForkApplyEvent'
 				return	# no example found for now. I will come back later
 			when 'GistEvent'
-				c = GitHub::Gist.new(js['payload']['id'])
-				c.read_and_parse
-				comment = c.js['description']
-				timestamp = c.timestamp
-				url = c.js['html_url']
-				yield Event.new(timestamp, comment, loc, url, type, avatar)
+				unless dry_run
+					c = GitHub::Gist.new(js['payload']['id'])
+					c.read_and_parse
+					comment = c.js['description']
+					timestamp = c.timestamp
+					url = c.js['html_url']
+				end
+				yield Event.new(timestamp || Time.parse(js['created_at']), comment, loc, url, type, avatar)
 				return
 			when 'GollumEvent'
 				return	# ignore for now
@@ -81,12 +87,14 @@ module GitHubArchive
 			when 'PublicEvent'
 				return	# emotions, if there are, are not from the event
 			when 'PullRequestEvent'
-				c = GitHub::SinglePullRequest.new(js['repository']['owner'], js['repository']['name'], js['payload']['number'])
-				c.read_and_parse
-				comment = c.js['body']
-				timestamp = c.timestamp
-				url = c.js['html_url']
-				yield Event.new(timestamp, comment, loc, url, type, avatar)
+				unless dry_run
+					c = GitHub::SinglePullRequest.new(js['repository']['owner'], js['repository']['name'], js['payload']['number'])
+					c.read_and_parse
+					comment = c.js['body']
+					timestamp = c.timestamp
+					url = c.js['html_url']
+				end
+				yield Event.new(timestamp || Time.parse(js['created_at']), comment, loc, url, type, avatar)
 				return
 			when 'PullRequestReviewCommentEvent'
 				comment = js['payload']['comment']['body']
@@ -95,13 +103,17 @@ module GitHubArchive
 				yield Event.new(timestamp, comment, loc, url, type, avatar)
 				return
 			when 'PushEvent'
-				js['payload']['shas'].each do |sha, email, message, name, distinct|
-					c = GitHub::Commit.new(js['repository']['owner'], js['repository']['name'], sha)
-					c.read_and_parse
-					comment = c.js['commit']['message']
-					timestamp = c.timestamp
-					url = c.js['html_url']
-					yield Event.new(timestamp, comment, loc, url, type, avatar)
+				unless dry_run
+					js['payload']['shas'].each do |sha, email, message, name, distinct|
+						c = GitHub::Commit.new(js['repository']['owner'], js['repository']['name'], sha)
+						c.read_and_parse
+						comment = c.js['commit']['message']
+						timestamp = c.timestamp
+						url = c.js['html_url']
+						yield Event.new(timestamp, comment, loc, url, type, avatar)
+					end
+				else
+					yield Event.new(Time.parse(js['created_at']), nil, loc, nil, type, avatar)
 				end
 				return
 			when 'TeamAddEvent'

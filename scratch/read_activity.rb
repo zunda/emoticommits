@@ -1,4 +1,13 @@
-# ruby scratch/read_activity.rb ~/Dropbox/GitHub-Data-Challenge-II/*.json.gz 
+#$ ruby scratch/read_activity.rb \
+# ~/Dropbox/GitHub-Data-Challenge-II/2013-04-12-18.json.gz  | sort |\
+# uniq -c | sort -nr
+#   1315 PushEvent
+#    251 CreateEvent
+#    109 PullRequestEvent
+#     22 CommitCommentEvent
+#     11 GistEvent
+#     10 PullRequestReviewCommentEvent
+
 require 'open-uri'
 require 'zlib'
 require 'yajl'
@@ -13,11 +22,8 @@ ARGV.each do |src|
 	end
 
 	Yajl::Parser.parse(js) do |ev|
-		GitHubArchive::EventParser.parse(ev) do |event|
-			puts "#{event.timestamp.strftime("%H:%M")} #{event.location}"
-			puts "#{event.url} #{event.gravatar_id}\n"
-			puts event.comment
-			puts
+		GitHubArchive::EventParser.parse(ev, true) do |event|
+			puts event.type
 		end
 	end
 end
