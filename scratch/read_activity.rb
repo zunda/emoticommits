@@ -89,6 +89,10 @@ next
 				timestamp = c.timestamp
 				url = c.js['html_url']
 			end
+		when 'TeamAddEvent'
+			next	# emotions, if there are, are not from the event
+		when 'WatchEvent'
+			next	# emotions, if there are, are not from the event
 		end
 
 		next unless comment
