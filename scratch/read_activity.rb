@@ -67,6 +67,8 @@ next
 			next	# emotions, if there are, are not from the event
 		when 'MemberEvent'
 			next	# emotions, if there are, are not from the event
+		when 'PublicEvent'
+			next	# emotions, if there are, are not from the event
 		end
 
 		next unless comment
