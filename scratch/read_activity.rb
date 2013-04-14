@@ -1,11 +1,10 @@
-# ruby scratch/read_activity.rb ~/Dropbox/GitHub-Data-Challenge-II/*.json.gz
-
+# ruby scratch/read_activity.rb ~/Dropbox/GitHub-Data-Challenge-II/*.json.gz 
 require 'open-uri'
 require 'zlib'
 require 'yajl'
 
 $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
-require 'githubarchive/endpoints'
+require 'githubapi/endpoints'
 
 ARGV.each do |src|
 	js = open(src)
@@ -28,12 +27,11 @@ ARGV.each do |src|
 		case ev['type']
 		when 'CommitCommentEvent'
 next
-			c = GitHubArchive::SingleCommitComment.new(ev['repository']['owner'], ev['repository']['name'], ev['payload']['comment_id'])
+			c = GitHub::SingleCommitComment.new(ev['repository']['owner'], ev['repository']['name'], ev['payload']['comment_id'])
 			c.read_and_parse
 			comment = c.js['body']
 			timestamp = c.timestamp
 			url = c.js['html_url']
-			puts "Comment:   #{comment}\nURL:       #{url}\nTimestamp: #{timestamp}"
 		when 'CreateEvent'
 next
 			comment = ev['payload']['description']
@@ -43,7 +41,7 @@ next
 			next	# nothing interesting
 		when 'DownloadEvent'
 next
-			c = GitHubArchive::Download.new(ev['repository']['owner'], ev['repository']['name'], ev['payload']['id'])
+			c = GitHub::Download.new(ev['repository']['owner'], ev['repository']['name'], ev['payload']['id'])
 			c.read_and_parse
 			comment = c.js['description']
 			timestamp = c.timestamp
@@ -56,13 +54,15 @@ next
 			next	# no example found for now. I will come back later
 		when 'GistEvent'
 next
-			c = GitHubArchive::Gist.new(ev['payload']['id'])
+			c = GitHub::Gist.new(ev['payload']['id'])
 			c.read_and_parse
 			comment = c.js['description']
 			timestamp = c.timestamp
 			url = c.js['html_url']
 		when 'GollumEvent'
 			next	# ignore for now
+		when 'IssueCommentEvent'
+			next	# could not find endpoint URL
 		end
 
 		next unless comment
