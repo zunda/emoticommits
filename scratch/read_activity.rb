@@ -38,6 +38,7 @@ ARGV.each do |src|
 			timestamp = Time.parse(ev['created_at'])
 			url = ev['url']
 		when 'DeleteEvent'
+			next	# nothing interesting
 		when 'DownloadEvent'
 		end
 
