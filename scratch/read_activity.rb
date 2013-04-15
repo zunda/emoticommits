@@ -40,11 +40,12 @@ ARGV.each do |src|
 
 	Yajl::Parser.parse(js) do |ev|
 		GitHubArchive::EventParser.parse(ev, dry_run: false, auth: conf.github_auth) do |event|
-			puts event.type
-			puts event.timestamp
-			puts event.location
-			puts event.gravatar_id
+			%w(type timestamp location url gravatar_id).each do |el|
+				puts "#{el}: #{event.send(el)}"
+			end
+			puts '-----'
 			puts event.comment
+			puts '-----'
 			puts
 		end
 	end
