@@ -22,6 +22,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
+require 'net/http'	# for Net::HTTPBadResponse
 require 'githubapi'
 
 module GitHubArchive
@@ -33,6 +34,10 @@ module GitHubArchive
 		attr_reader :type	# String
 		attr_reader :gravatar_id	# String
 
+		def Event.schema
+			{'timestamp' => Time, 'comment' => String, 'location' => String, 'url' => String, 'type' => String, 'gravatar_id' => String}
+		end
+
 		def initialize(timestamp, comment, location, url, type, gravatar_id)
 			@timestamp = timestamp
 			@comment = comment
@@ -40,6 +45,14 @@ module GitHubArchive
 			@url = url
 			@type = type
 			@gravatar_id = gravatar_id
+		end
+		
+		def to_h
+			result = {}
+			Event.schema.keys.each do |key|
+				result[key] = self.send(key)
+			end
+			return result
 		end
 	end
 
