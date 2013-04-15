@@ -13,12 +13,13 @@ module GitHubApi
 		attr_reader :js
 		attr_reader :timestamp
 
-		def initialize(url)
+		def initialize(url, opts = {auth: []})
 			@url = url
+			@auth = opts[:auth]
 		end
 
 		def read_and_parse
-			@js = Yajl::Parser.parse(open(@url, 'User-Agent' => AGENT).read)
+			@js = Yajl::Parser.parse(open(@url, 'User-Agent' => AGENT, :http_basic_authentication => @auth).read)
 			@timestamp = Time.parse(@js['created_at']) if @js['created_at']
 		end
 	end
