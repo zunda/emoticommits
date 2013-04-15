@@ -19,6 +19,7 @@ module GitHubArchive
 		end
 	end
 
+	# Errors that parser cannot continue but continue parsing other events
 	class EventParseError < StandardError; end
 
 	# based upon http://developer.github.com/v3/activity/events/types/
@@ -133,10 +134,12 @@ module GitHubArchive
 			rescue OpenURI::HTTPError => e
 				case e.message[0..2]
 				when '404'	# Not Found
-					raise EventParseError.new("#{e.message} for #{c.url} from #{type} created_at #{js['created_at']}")
+					raise EventParseError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
 				else
 					raise e
 				end
+			rescue Net::HTTPBadResponse => e
+				raise EventParseError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
 			end
 		end
 	end
