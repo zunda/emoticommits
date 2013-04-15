@@ -1,8 +1,8 @@
-# 18 event types are implemented
-# http://developer.github.com/v3/activity/events/types/
 require 'open-uri'
 require 'yajl'
 
+# APIs referred from
+# http://developer.github.com/v3/activity/events/types/
 module GitHubApi
 	class Base
 		HOST = 'https://api.github.com'
