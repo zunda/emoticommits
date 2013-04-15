@@ -19,6 +19,7 @@ module GitHubArchive
 		end
 	end
 
+	# based upon http://developer.github.com/v3/activity/events/types/
 	class EventParser
 		# yeilds Event
 		# auth: [user, password]
