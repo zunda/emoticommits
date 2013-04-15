@@ -19,6 +19,8 @@ module GitHubArchive
 		end
 	end
 
+	class EventParseError < StandardError; end
+
 	# based upon http://developer.github.com/v3/activity/events/types/
 	class EventParser
 		# yeilds Event
@@ -131,8 +133,8 @@ module GitHubArchive
 			rescue OpenURI::HTTPError => e
 				case e.message[0..2]
 				when '404'	# Not Found
-					$stderr.puts "#{e.message} for #{c.url} from #{type} created_at #{js['created_at']}"
-				when '401'	# Autorization Required
+					raise EventParseError.new("#{e.message} for #{c.url} from #{type} created_at #{js['created_at']}")
+				else
 					raise e
 				end
 			end
