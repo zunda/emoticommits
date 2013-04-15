@@ -1,4 +1,4 @@
-require 'githubapi/endpoints'
+require 'githubapi'
 
 module GitHubArchive
 	class Event
@@ -36,7 +36,7 @@ module GitHubArchive
 			case type
 			when 'CommitCommentEvent'
 				unless dry_run
-					c = GitHub::SingleCommitComment.new(js['repository']['owner'], js['repository']['name'], js['payload']['comment_id'])
+					c = GitHubApi::SingleCommitComment.new(js['repository']['owner'], js['repository']['name'], js['payload']['comment_id'], auth: auth)
 					c.read_and_parse
 					comment = c.js['body']
 					timestamp = c.timestamp
@@ -54,7 +54,7 @@ module GitHubArchive
 				return	# nothing interesting
 			when 'DownloadEvent'
 				unless dry_run
-					c = GitHub::Download.new(js['repository']['owner'], js['repository']['name'], js['payload']['id'])
+					c = GitHubApi::Download.new(js['repository']['owner'], js['repository']['name'], js['payload']['id'], auth: auth)
 					c.read_and_parse
 					comment = c.js['description']
 					timestamp = c.timestamp
@@ -70,7 +70,7 @@ module GitHubArchive
 				return	# no example found for now. I will come back later
 			when 'GistEvent'
 				unless dry_run
-					c = GitHub::Gist.new(js['payload']['id'])
+					c = GitHubApi::Gist.new(js['payload']['id'], auth: auth)
 					c.read_and_parse
 					comment = c.js['description']
 					timestamp = c.timestamp
@@ -90,7 +90,7 @@ module GitHubArchive
 				return	# emotions, if there are, are not from the event
 			when 'PullRequestEvent'
 				unless dry_run
-					c = GitHub::SinglePullRequest.new(js['repository']['owner'], js['repository']['name'], js['payload']['number'])
+					c = GitHubApi::SinglePullRequest.new(js['repository']['owner'], js['repository']['name'], js['payload']['number'], auth: auth)
 					c.read_and_parse
 					comment = c.js['body']
 					timestamp = c.timestamp
@@ -107,7 +107,7 @@ module GitHubArchive
 			when 'PushEvent'
 				unless dry_run
 					js['payload']['shas'].each do |sha, email, message, name, distinct|
-						c = GitHub::Commit.new(js['repository']['owner'], js['repository']['name'], sha)
+						c = GitHubApi::Commit.new(js['repository']['owner'], js['repository']['name'], sha, auth: auth)
 						c.read_and_parse
 						comment = c.js['commit']['message']
 						timestamp = c.timestamp
