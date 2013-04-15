@@ -69,7 +69,7 @@ ARGV.each do |src|
 
 	Yajl::Parser.parse(js) do |ev|
 		begin
-			GitHubArchive::EventParser.parse(ev, dry_run: true, auth: conf.github_auth) do |event|
+			GitHubArchive::EventParser.parse(ev, dry_run: false, auth: conf.github_auth) do |event|
 				h = event.to_h
 				values = GitHubArchive::Event.schema.keys.map do |k|
 					k != 'timestamp' ?  h[k] : h[k].to_i
