@@ -23,6 +23,8 @@
 #
 
 require 'test/unit'
+$:.unshift(File.join(File.dirname(__FILE__), '..', 'test'))
+require 'datapath_helper'
 
 $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'githubapi'
@@ -30,10 +32,6 @@ require 'githubapi'
 include GitHubApi
 
 class TestApi < Test::Unit::TestCase
-	def datapath(basename)
-		File.join(File.dirname(__FILE__), 'sample-json', basename)
-	end
-
 	def test_timestamp
 		t = Base.new(datapath('SingleCommitComment.json'))
 		t.read_and_parse
