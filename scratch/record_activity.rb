@@ -29,23 +29,17 @@ require 'sqlite3'
 
 $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'githubarchive'
+require 'conf'
 
 # e.g.
 # @github_auth = ['username', 'password']
-class Configuration
-	def Configuration.load(path)
-		c = Configuration.new()
-		begin
-			c.instance_eval(File.read(path))
-		rescue SystemCallError
-		end
-		return c
-	end
-	
+class Configuration < ConfigurationBase
 	attr_reader :github_auth
 end
-
-conf = Configuration.load(File.join(ENV['HOME'], '.githubarchiverc'))
+conf = Configuration.load('~/.githubarchiverc')
+if conf._error_
+	$stderr.puts "Warning: #{conf._error_.message}"
+end
 
 dbpath = ARGV.shift
 
