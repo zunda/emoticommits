@@ -40,6 +40,10 @@ module GoogleApi
 		attr_reader :status
 		attr_reader :timestamp
 
+		def Geocoding.schema
+			{'timestamp' => Time, 'address' => Float, 'lat' => Float, 'lng' => Float, 'status' => String}
+		end
+
 		attr_reader :uri
 
 		def initialize(address)
@@ -67,6 +71,14 @@ module GoogleApi
 			r.read
 			r.parse(timestamp)
 			return r
+		end
+
+		def to_h
+			result = {}
+			Geocoding.schema.keys.each do |key|
+				result[key] = self.send(key)
+			end
+			return result
 		end
 	end
 end
