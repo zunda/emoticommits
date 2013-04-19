@@ -21,14 +21,19 @@
         map = new google.maps.Map(document.getElementById("map-canvas"),
           mapOptions);
       };
-      function pin(lat, lng) {
+      function droppin(lat, lng) {
         marker = new google.maps.Marker({
-        map: map,
+          map: map,
           draggable: false,
           animation: google.maps.Animation.DROP,
-          position: google.maps.LatLng(lat, lng)
+          position: new google.maps.LatLng(lat, lng)
         })
+        return marker;
       };
+      function removepin(marker) {
+        if (marker != null) marker.setMap(null);
+        delete marker;
+      }
       google.maps.event.addDomListener(window, 'load', initialize);
     </script>
   </head>

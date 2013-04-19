@@ -10,6 +10,7 @@
 
     <title>Emoticommits</title>
     <script type="text/javascript">
+      var marker = null;
       var mapwindow;
       function initialize() {
         mapwindow = document.getElementById("mapframe").contentWindow;
@@ -38,8 +39,10 @@
           height="100%" width="100%" frameBorder="0" scrolling="no">
         </iframe>
         <form>
-        <input type="button" value="Pin!"
-          onClick="mapwindow.pin(19.7297222, -155.09)">
+          <input type="button" value="Pin!"
+            onClick="if (marker == null) { marker = mapwindow.droppin(19.7297222, -155.09); }">
+          <input type="button" value="Clear"
+            onClick="mapwindow.removepin(marker); marker = null">
         </form>
       </section>
     </div>
