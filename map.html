@@ -21,12 +21,17 @@
         map = new google.maps.Map(document.getElementById("map-canvas"),
           mapOptions);
       };
-      function droppin(lat, lng) {
+      function droppin(lat, lng, icon, size) {
         marker = new google.maps.Marker({
           map: map,
           draggable: false,
           animation: google.maps.Animation.DROP,
-          position: new google.maps.LatLng(lat, lng)
+          position: new google.maps.LatLng(lat, lng),
+          icon: {
+            url: icon,
+            scaledSize: new google.maps.Size(size, size),
+            anchor: new google.maps.Point(size/2, size/2),
+          }
         })
         return marker;
       };
