@@ -9,6 +9,13 @@
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
 
     <title>Emoticommits</title>
+    <script type="text/javascript">
+      var mapwindow;
+      function initialize() {
+        mapwindow = document.getElementById("mapframe").contentWindow;
+      }
+      window.onload = initialize;
+    </script>
   </head>
 
   <body>
@@ -27,9 +34,13 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <iframe height="100%" width="100%" frameBorder="0" scrolling="no"
-          src="./map.html">
+        <iframe id="mapframe" src="./map.html"
+          height="100%" width="100%" frameBorder="0" scrolling="no">
         </iframe>
+        <form>
+        <input type="button" value="Pin!"
+          onClick="mapwindow.pin(19.7297222, -155.09)">
+        </form>
       </section>
     </div>
 
