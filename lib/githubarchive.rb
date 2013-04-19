@@ -172,6 +172,8 @@ module GitHubArchive
 				case e.message[0..2]
 				when '404'	# Not Found
 					raise EventParseError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
+				when '500'	# Internal Server Error
+					raise EventParseError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
 				when '502'	# Bad Gateway
 					raise EventParseError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
 				else
