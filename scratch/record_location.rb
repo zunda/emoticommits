@@ -1,4 +1,8 @@
 #
+# usage: ruby scrach/record_activity.rb location-db-path address ...
+# Queries locations of addresses and record them into location-db
+#
+#
 # Copyright (c) 2013 zunda <zunda at freeshell.org>
 #
 # Permission is hereby granted, free of charge, to any person

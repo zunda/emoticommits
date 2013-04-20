@@ -1,4 +1,11 @@
 #
+# usage: ruby scrach/record_activity.rb event-db-path github-archive-json ...
+# Parses github-archive-json and record events to event-db-path
+#
+# Have ~/.githubarchiverc hold GitHub auth information, e.g.:
+# @github_auth = ['username', 'password']
+#
+#
 # Copyright (c) 2013 zunda <zunda at freeshell.org>
 #
 # Permission is hereby granted, free of charge, to any person
@@ -31,8 +38,6 @@ require 'githubarchive'
 require 'conf'
 require 'sqlite3if'
 
-# e.g.
-# @github_auth = ['username', 'password']
 class Configuration < ConfigurationBase
 	attr_reader :github_auth
 end

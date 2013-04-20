@@ -1,4 +1,8 @@
 #
+# usage: ruby scrach/query_location.rb event-db-path location-db-path
+# Queries up to 10 locations of events and store them
+#
+#
 # Copyright (c) 2013 zunda <zunda at freeshell.org>
 #
 # Permission is hereby granted, free of charge, to any person
