@@ -32,9 +32,29 @@ class Throttle
 	end
 
 	def exec(&block)
-		Process.wait @pid if @pid
+		Process.wait(@pid) if @pid
 		r = yield(block)
 		@pid = fork{sleep @interval}
 		return r
+	end
+
+	def kill
+		if @pid
+			Process.kill(:INT, @pid)
+			Process.wait(@pid)
+			@pid = nil
+		end
+	end
+end
+
+class DummyThrottle
+	def initialize(*args)
+	end
+
+	def exec(&block)
+		return yield(block)
+	end
+
+	def kill
 	end
 end

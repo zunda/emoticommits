@@ -39,10 +39,10 @@ module GitHubApi
 		attr_reader :js
 		attr_reader :timestamp
 
-		def initialize(url, opts = {auth: []})
+		def initialize(url, opts = {auth: [], throttle: nil})
 			@url = url
 			@auth = opts[:auth]
-			@throttle = Throttle.new(opts[:wait] || 1.0)
+			@throttle = opts[:throttle] || DummyThrottle.new
 		end
 
 		def read_and_parse

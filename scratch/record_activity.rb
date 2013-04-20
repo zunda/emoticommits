@@ -30,6 +30,7 @@ require 'sqlite3'
 $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'githubarchive'
 require 'conf'
+require 'throttle'
 
 # e.g.
 # @github_auth = ['username', 'password']
@@ -40,6 +41,7 @@ conf = Configuration.load('~/.githubarchiverc')
 if conf._error_
 	$stderr.puts "Warning: #{conf._error_.message}"
 end
+throttle = Throttle.new(1.0)
 
 dbpath = ARGV.shift
 
@@ -63,7 +65,7 @@ ARGV.each do |src|
 
 	Yajl::Parser.parse(js) do |ev|
 		begin
-			GitHubArchive::EventParser.parse(ev, dry_run: false, auth: conf.github_auth) do |event|
+			GitHubArchive::EventParser.parse(ev, dry_run: false, throttle: throttle, auth: conf.github_auth) do |event|
 				h = event.to_h
 				values = GitHubArchive::Event.schema.keys.map do |k|
 					k != 'timestamp' ?  h[k] : h[k].to_i
@@ -77,3 +79,4 @@ ARGV.each do |src|
 end
 
 db.close
+throttle.kill
