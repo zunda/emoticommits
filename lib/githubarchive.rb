@@ -24,7 +24,6 @@
 
 require 'net/http'	# for Net::HTTPBadResponse
 require 'githubapi'
-require 'throttle'
 
 module GitHubArchive
 	class Event
@@ -64,11 +63,10 @@ module GitHubArchive
 	class EventParser
 		# yeilds Event
 		# auth: [user, password]
-		def EventParser.parse(js, opts = {dry_run: false, auth: nil, throttle: nil})
+		def EventParser.parse(js, opts = {dry_run: false, auth: nil})
 			begin
 				dry_run = opts[:dry_run]
 				auth = opts[:auth]
-				throttle = opts[:throttle] || DummyThrottle.new
 
 				actor = js['actor_attributes']
 				return unless actor
@@ -83,7 +81,7 @@ module GitHubArchive
 				case type
 				when 'CommitCommentEvent'
 					unless dry_run
-						c = GitHubApi::SingleCommitComment.new(js['repository']['owner'], js['repository']['name'], js['payload']['comment_id'], auth: auth, throttle: throttle)
+						c = GitHubApi::SingleCommitComment.new(js['repository']['owner'], js['repository']['name'], js['payload']['comment_id'], auth: auth)
 						c.read_and_parse
 						comment = c.js['body']
 						timestamp = c.timestamp
@@ -101,7 +99,7 @@ module GitHubArchive
 					return	# nothing interesting
 				when 'DownloadEvent'
 					unless dry_run
-						c = GitHubApi::Download.new(js['repository']['owner'], js['repository']['name'], js['payload']['id'], auth: auth, throttle: throttle)
+						c = GitHubApi::Download.new(js['repository']['owner'], js['repository']['name'], js['payload']['id'], auth: auth)
 						c.read_and_parse
 						comment = c.js['description']
 						timestamp = c.timestamp
@@ -117,7 +115,7 @@ module GitHubArchive
 					return	# no example found for now. I will come back later
 				when 'GistEvent'
 					unless dry_run
-						c = GitHubApi::Gist.new(js['payload']['id'], auth: auth, throttle: throttle)
+						c = GitHubApi::Gist.new(js['payload']['id'], auth: auth)
 						c.read_and_parse
 						comment = c.js['description']
 						timestamp = c.timestamp
@@ -137,7 +135,7 @@ module GitHubArchive
 					return	# emotions, if there are, are not from the event
 				when 'PullRequestEvent'
 					unless dry_run
-						c = GitHubApi::SinglePullRequest.new(js['repository']['owner'], js['repository']['name'], js['payload']['number'], auth: auth, throttle: throttle)
+						c = GitHubApi::SinglePullRequest.new(js['repository']['owner'], js['repository']['name'], js['payload']['number'], auth: auth)
 						c.read_and_parse
 						comment = c.js['body']
 						timestamp = c.timestamp
@@ -154,7 +152,7 @@ module GitHubArchive
 				when 'PushEvent'
 					unless dry_run
 						js['payload']['shas'].each do |sha, email, message, name, distinct|
-							c = GitHubApi::Commit.new(js['repository']['owner'], js['repository']['name'], sha, auth: auth, throttle: throttle)
+							c = GitHubApi::Commit.new(js['repository']['owner'], js['repository']['name'], sha, auth: auth)
 							c.read_and_parse
 							comment = c.js['commit']['message']
 							timestamp = c.timestamp
