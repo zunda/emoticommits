@@ -25,6 +25,8 @@
 require 'open-uri'
 require 'yajl'
 
+require 'throttle'
+
 # APIs referred from
 # http://developer.github.com/v3/activity/events/types/
 module GitHubApi
@@ -40,10 +42,11 @@ module GitHubApi
 		def initialize(url, opts = {auth: []})
 			@url = url
 			@auth = opts[:auth]
+			@throttle = Throttle.new(opts[:wait] || 1.0)
 		end
 
 		def read_and_parse
-			@js = Yajl::Parser.parse(open(@url, 'User-Agent' => AGENT, :http_basic_authentication => @auth).read)
+			@js = Yajl::Parser.parse(@throttle.exec{open(@url, 'User-Agent' => AGENT, :http_basic_authentication => @auth).read})
 			@timestamp = Time.parse(@js['created_at']) if @js['created_at']
 		end
 	end
