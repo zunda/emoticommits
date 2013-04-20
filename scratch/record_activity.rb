@@ -25,11 +25,11 @@
 require 'open-uri'
 require 'zlib'
 require 'yajl'
-require 'sqlite3'
 
 $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'githubarchive'
 require 'conf'
+require 'sqlite3if'
 
 # e.g.
 # @github_auth = ['username', 'password']
@@ -43,17 +43,8 @@ end
 
 dbpath = ARGV.shift
 
-sqlite_type = {Time => 'integer', String => 'text'}
-db = SQLite3::Database.open(dbpath)
-db.execute(<<"_END")
-create table if not exists events (
-#{GitHubArchive::Event.schema.to_a.map{|k, t| "#{k} #{sqlite_type[t]}"}.join(",\n")}
-);
-_END
-
-keys = GitHubArchive::Event.schema.keys.join(',')
-placeholders = (['?'] * GitHubArchive::Event.schema.keys.size).join(',')
-db_insert = "INSERT INTO events(#{keys}) VALUES (#{placeholders})"
+db = SQLite3Database.open(dbpath)
+db.create_table('events', GitHubArchive::Event.schema)
 
 ARGV.each do |src|
 	js = open(src)
@@ -64,11 +55,7 @@ ARGV.each do |src|
 	Yajl::Parser.parse(js) do |ev|
 		begin
 			GitHubArchive::EventParser.parse(ev, dry_run: false, auth: conf.github_auth) do |event|
-				h = event.to_h
-				values = GitHubArchive::Event.schema.keys.map do |k|
-					k != 'timestamp' ?  h[k] : h[k].to_i
-				end
-				db.execute(db_insert, *values)
+				db.insert('events', GitHubArchive::Event.schema, event.to_h)
 			end
 		rescue GitHubArchive::EventParseError => e
 			$stderr.puts e.message

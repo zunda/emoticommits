@@ -21,25 +21,35 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 #
+require 'sqlite3'
 
-$:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
-require 'geocoding'
-require 'conf'
-require 'sqlite3if'
+class SQLite3Database < SQLite3::Database
+	SQLite3Types = {Time => 'integer', String => 'text', Float => 'real'}
 
-dbpath = ARGV.shift
+	# Specifies default timeout
+	def open(dbpath, timeout = 100)
+		db = super(dbpath)
+		db.timeout(timeout)
+		return db
+	end
 
-sqlite_type = {Time => 'integer', String => 'text', Float => 'real'}
-db = SQLite3Database.open(dbpath)
-db.create_table('locations', GoogleApi::Geocoding.schema)
+	# Creates table with schame as a Hash of key:column-name and value:Ruby type
+	def create_table(table, schema)
+		sql = "CREATE TABLE IF NOT EXISTS #{table} (\n"
+		sql << schema.to_a.map{|row, type| "#{row} #{SQLite3Types[type]}"}.join(",\n")
+		sql << "\n);"
+		execute(sql)
+	end
 
-keys = GoogleApi::Geocoding.schema.keys.join(',')
-placeholders = (['?'] * GoogleApi::Geocoding.schema.keys.size).join(',')
-db_insert = "INSERT INTO locations(#{keys}) VALUES (#{placeholders})"
-
-ARGV.each do |address|
-	location = GoogleApi::Geocoding.query(address)
-	db.insert('locations', GoogleApi::Geocoding.schema, location.to_h)
+	def insert(table, schema, hash_values)
+		keys = schema.keys.join(',')
+		placeholders = (['?'] * schema.keys.size).join(',')
+		sql = "INSERT INTO #{table}(#{keys}) VALUES (#{placeholders})"
+		values = schema.keys.map do |k|
+			value = hash_values[k]
+			value = value.to_i if schema[k] == Time
+			value
+		end
+		execute(sql, values)
+	end
 end
-
-db.close
