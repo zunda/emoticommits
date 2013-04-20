@@ -33,10 +33,6 @@ sqlite_type = {Time => 'integer', String => 'text', Float => 'real'}
 db = SQLite3Database.open(dbpath)
 db.create_table('locations', GoogleApi::Geocoding.schema)
 
-keys = GoogleApi::Geocoding.schema.keys.join(',')
-placeholders = (['?'] * GoogleApi::Geocoding.schema.keys.size).join(',')
-db_insert = "INSERT INTO locations(#{keys}) VALUES (#{placeholders})"
-
 ARGV.each do |address|
 	location = GoogleApi::Geocoding.query(address)
 	db.insert('locations', GoogleApi::Geocoding.schema, location.to_h)
