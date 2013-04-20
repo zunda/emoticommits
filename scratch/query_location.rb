@@ -21,39 +21,29 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 #
-require 'sqlite3'
 
-class SQLite3Database < SQLite3::Database
-	SQLite3Types = {Time => 'integer', String => 'text', Float => 'real'}
+$:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
+require 'githubarchive'
+require 'geocoding'
+require 'sqlite3if'
 
-	# Specifies default timeout
-	def open(dbpath, timeout = 100)
-		db = super(dbpath)
-		db.timeout(timeout)
-		return db
-	end
+eventdb = SQLite3Database.open(ARGV.shift)
+locationdb = SQLite3Database.open(ARGV.shift)
+maxquery = 10
 
-	# Creates table with schame as a Hash of key:column-name and value:Ruby type
-	def create_table(table, schema)
-		sql = "CREATE TABLE IF NOT EXISTS #{table} (\n"
-		sql << schema.to_a.map{|row, type| "#{row} #{SQLite3Types[type]}"}.join(",\n")
-		sql << "\n);"
-		execute(sql)
-	end
-
-	def insert(table, schema, hash_values)
-		keys = schema.keys.join(',')
-		placeholders = (['?'] * schema.keys.size).join(',')
-		sql = "INSERT INTO #{table}(#{keys}) VALUES (#{placeholders})"
-		values = schema.keys.map do |k|
-			value = hash_values[k]
-			value = value.to_i if schema[k] == Time
-			value
+queries = 0
+eventdb.select('DISTINCT location FROM events').map{|e| e[0]}.shuffle.each do |address|
+	if locationdb.select('COUNT(*) FROM locations WHERE (status = "OK" or status = "ZERO_RESULTS") and address = ?', address)[0][0] < 1
+		print "#{address} => "
+		location = GoogleApi::Geocoding.query(address)
+		locationdb.insert('locations', GoogleApi::Geocoding.schema, location.to_h)
+		case location.status
+		when 'OK'
+			puts "#{location.lat},#{location.lng}"
+		else
+			puts location.status
 		end
-		execute(sql, values)
+		queries += 1
 	end
-
-	def select(sql, *args, &block)
-		execute("SELECT #{sql};", *args, &block)
-	end
+	break if queries >= maxquery
 end
