@@ -34,7 +34,7 @@ module GitHubArchive
 		end
 		include Schemable
 
-		def initialize(timestamp, comment, location, url, type, gravatar_id)
+		def initialize(timestamp = nil, comment = nil, location = nil, url = nil, type = nil, gravatar_id = nil)
 			@timestamp = timestamp
 			@comment = comment
 			@location = location

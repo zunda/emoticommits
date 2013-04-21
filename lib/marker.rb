@@ -22,54 +22,32 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
-require 'open-uri'
-require 'uri'
-require 'yajl'
-
+require 'githubarchive'
+require 'geocoding'
 require 'sqlite3if'
+require 'emoji'
 
-# APIs referred from
-# https://developers.google.com/maps/documentation/geocoding/
-module GoogleApi
-	class Geocoding
-		URL = URI::parse('http://maps.googleapis.com/maps/api/geocode/json')
-		VERSION = '0.0.0'
-		AGENT = "zunda@gmail.com - GoogleApi - #{VERSION}"
+class Marker
+	GravatarUrl = 'http://www.gravatar.com/avatar/%s'
+	EmoticonUrl = 'http://assets.github.com/images/icons/emoji/%s.png'
 
-		def Geocoding.schema
-			{'timestamp' => Time, 'address' => Float, 'lat' => Float, 'lng' => Float, 'status' => String}
-		end
-		include Schemable
+	def Marker.schema
+		{'time' => Time, 'emotion' => TrueClass, 'lat' => Float, 'lng' => Float, 'icon' => String, 'url' => String}
+	end
+	include Schemable
 
-		attr_reader :uri
-
-		def initialize(address = nil)
-			if address
-				@address = address
-				uri = URL.dup
-				uri.query = URI.encode_www_form('address'=>@address, 'sensor'=>'false')
-				@uri = uri.to_s
-			end
-		end
-
-		def read(uri = nil)
-			@js = Yajl::Parser.parse(open(uri || @uri, 'User-Agent' => AGENT).read)
-		end
-
-		def parse(timestamp = Time.now)
-			@status = @js['status']
-			if @status == 'OK'
-				@lat = @js['results'][0]['geometry']['location']['lat']
-				@lng = @js['results'][0]['geometry']['location']['lng']
-			end
-			@timestamp = timestamp
-		end
-
-		def Geocoding.query(address, timestamp = Time.now)
-			r = Geocoding.new(address)
-			r.read
-			r.parse(timestamp)
-			return r
+	def initialize(event = nil, geocoding = nil)
+		@time = event.timestamp
+		@lat = geocoding.lat
+		@lng = geocoding.lng
+		@url = event.url
+		emoji = Emoji::Scanner.first_emoji(event.comment)
+		if emoji
+			@emotion = true
+			@icon = EmoticonUrl % emoji[1..-2]	# strip :'s
+		else
+			@emotion = false
+			@icon = GravatarUrl % event.gravatar_id
 		end
 	end
 end

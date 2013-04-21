@@ -32,7 +32,7 @@ module Schemable
 end
 
 class SQLite3Database < SQLite3::Database
-	SQLite3Types = {Time => 'integer', String => 'text', Float => 'real'}
+	SQLite3Types = {Time => 'integer', String => 'text', Float => 'real', TrueClass => 'integer'}
 
 	# Specifies default timeout
 	def open(dbpath, timeout = 100)
@@ -57,6 +57,7 @@ class SQLite3Database < SQLite3::Database
 		values = schema.keys.map do |k|
 			value = obj.send(k)
 			value = value.to_i if schema[k] == Time
+			value = value ? 1 : 0 if schema[k] == TrueClass
 			value
 		end
 		execute(sql, values)
@@ -73,6 +74,7 @@ class SQLite3Database < SQLite3::Database
 			klass.schema.keys.each_with_index do |key, i|
 				value = row[i]
 				value = Time.at(value) if klass.schema[key] == Time
+				value = (value == 1) if klass.schema[key] == TrueClass
 				obj.send("#{key}=", value)
 			end
 			yield(obj)
