@@ -26,6 +26,8 @@ require 'open-uri'
 require 'uri'
 require 'yajl'
 
+require 'sqlite3if'
+
 # APIs referred from
 # https://developers.google.com/maps/documentation/geocoding/
 module GoogleApi
@@ -33,6 +35,8 @@ module GoogleApi
 		URL = URI::parse('http://maps.googleapis.com/maps/api/geocode/json')
 		VERSION = '0.0.0'
 		AGENT = "zunda@gmail.com - GoogleApi - #{VERSION}"
+
+		include Schemable
 
 		attr_reader :address
 		attr_reader :lat
@@ -71,14 +75,6 @@ module GoogleApi
 			r.read
 			r.parse(timestamp)
 			return r
-		end
-
-		def to_h
-			result = {}
-			Geocoding.schema.keys.each do |key|
-				result[key] = self.send(key)
-			end
-			return result
 		end
 	end
 end

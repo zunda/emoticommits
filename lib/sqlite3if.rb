@@ -23,6 +23,16 @@
 #
 require 'sqlite3'
 
+module Schemable
+	def to_h
+		result = {}
+		self.class.schema.keys.each do |key|
+			result[key] = self.send(key)
+		end
+		return result
+	end
+end
+
 class SQLite3Database < SQLite3::Database
 	SQLite3Types = {Time => 'integer', String => 'text', Float => 'real'}
 

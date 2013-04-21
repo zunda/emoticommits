@@ -23,10 +23,14 @@
 #
 
 require 'net/http'	# for Net::HTTPBadResponse
+
 require 'githubapi'
+require 'sqlite3if'
 
 module GitHubArchive
 	class Event
+		include Schemable
+
 		attr_reader :timestamp	# Time
 		attr_reader :comment	# String
 		attr_reader :location	# String
@@ -45,14 +49,6 @@ module GitHubArchive
 			@url = url
 			@type = type
 			@gravatar_id = gravatar_id
-		end
-		
-		def to_h
-			result = {}
-			Event.schema.keys.each do |key|
-				result[key] = self.send(key)
-			end
-			return result
 		end
 	end
 
