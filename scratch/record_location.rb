@@ -1,5 +1,5 @@
 #
-# usage: ruby scrach/record_activity.rb location-db-path address ...
+# usage: ruby scratch/record_location.rb location-db-path address ...
 # Queries locations of addresses and record them into location-db
 #
 #
@@ -39,7 +39,7 @@ db.create_table('locations', GoogleApi::Geocoding.schema)
 
 ARGV.each do |address|
 	location = GoogleApi::Geocoding.query(address)
-	db.insert('locations', GoogleApi::Geocoding.schema, location.to_h)
+	db.insert('locations', location)
 end
 
 db.close

@@ -1,5 +1,5 @@
 #
-# usage: ruby scrach/record_activity.rb event-db-path github-archive-json ...
+# usage: ruby scratch/record_activity.rb event-db-path github-archive-json ...
 # Parses github-archive-json and record events to event-db-path
 #
 # Have ~/.githubarchiverc hold GitHub auth information, e.g.:
@@ -60,7 +60,7 @@ ARGV.each do |src|
 	Yajl::Parser.parse(js) do |ev|
 		begin
 			GitHubArchive::EventParser.parse(ev, dry_run: false, auth: conf.github_auth) do |event|
-				db.insert('events', GitHubArchive::Event.schema, event.to_h)
+				db.insert('events', event)
 			end
 		rescue GitHubArchive::EventParseError => e
 			$stderr.puts e.message

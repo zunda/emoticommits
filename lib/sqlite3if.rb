@@ -24,12 +24,10 @@
 require 'sqlite3'
 
 module Schemable
-	def to_h
-		result = {}
-		self.class.schema.keys.each do |key|
-			result[key] = self.send(key)
+	def Schemable.included(mod)
+		mod.schema.keys.each do |key|
+			class_eval("attr_accessor :#{key}")
 		end
-		return result
 	end
 end
 
@@ -51,12 +49,13 @@ class SQLite3Database < SQLite3::Database
 		execute(sql)
 	end
 
-	def insert(table, schema, hash_values)
+	def insert(table, obj)
+		schema = obj.class.schema
 		keys = schema.keys.join(',')
 		placeholders = (['?'] * schema.keys.size).join(',')
 		sql = "INSERT INTO #{table}(#{keys}) VALUES (#{placeholders})"
 		values = schema.keys.map do |k|
-			value = hash_values[k]
+			value = obj.send(k)
 			value = value.to_i if schema[k] == Time
 			value
 		end
@@ -65,5 +64,31 @@ class SQLite3Database < SQLite3::Database
 
 	def select(sql, *args, &block)
 		execute("SELECT #{sql};", *args, &block)
+	end
+
+	def retrieve_with_block(table, klass, where, *args)
+		keys = klass.schema.keys.join(',')
+		execute("SELECT * from #{table} #{where};", *args).each do |row|
+			obj = klass.new
+			klass.schema.keys.each_with_index do |key, i|
+				value = row[i]
+				value = Time.at(value) if klass.schema[key] == Time
+				obj.send("#{key}=", value)
+			end
+			yield(obj)
+		end
+	end
+	private :retrieve_with_block
+
+	def retrieve(table, klass, where, *args, &block) 
+		if block_given?
+			return retrieve_with_block(table, klass, where, *args, &block)
+		else
+			result = Array.new
+			retrieve_with_block(table, klass, where, *args) do |obj|
+				result << obj
+			end
+			return result
+		end
 	end
 end

@@ -40,7 +40,7 @@ eventdb.select('DISTINCT location FROM events').map{|e| e[0]}.shuffle.each do |a
 	if locationdb.select('COUNT(*) FROM locations WHERE (status = "OK" or status = "ZERO_RESULTS") and address = ?', address)[0][0] < 1
 		print "#{address} => "
 		location = GoogleApi::Geocoding.query(address)
-		locationdb.insert('locations', GoogleApi::Geocoding.schema, location.to_h)
+		locationdb.insert('locations', location)
 		case location.status
 		when 'OK'
 			puts "#{location.lat},#{location.lng}"

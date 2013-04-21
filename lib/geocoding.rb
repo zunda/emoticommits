@@ -36,17 +36,10 @@ module GoogleApi
 		VERSION = '0.0.0'
 		AGENT = "zunda@gmail.com - GoogleApi - #{VERSION}"
 
-		include Schemable
-
-		attr_reader :address
-		attr_reader :lat
-		attr_reader :lng
-		attr_reader :status
-		attr_reader :timestamp
-
 		def Geocoding.schema
 			{'timestamp' => Time, 'address' => Float, 'lat' => Float, 'lng' => Float, 'status' => String}
 		end
+		include Schemable
 
 		attr_reader :uri
 

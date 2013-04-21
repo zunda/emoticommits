@@ -29,18 +29,10 @@ require 'sqlite3if'
 
 module GitHubArchive
 	class Event
-		include Schemable
-
-		attr_reader :timestamp	# Time
-		attr_reader :comment	# String
-		attr_reader :location	# String
-		attr_reader :url	# String
-		attr_reader :type	# String
-		attr_reader :gravatar_id	# String
-
 		def Event.schema
 			{'timestamp' => Time, 'comment' => String, 'location' => String, 'url' => String, 'type' => String, 'gravatar_id' => String}
 		end
+		include Schemable
 
 		def initialize(timestamp, comment, location, url, type, gravatar_id)
 			@timestamp = timestamp
