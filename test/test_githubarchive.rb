@@ -42,10 +42,6 @@ class TestEvent < Test::Unit::TestCase
 		@t = Event.new(V['timestamp'], V['comment'], V['location'], V['url'], V['type'], V['gravatar_id'])
 	end
 
-	def test_to_h
-		assert_equal(V.sort, @t.to_h.sort)
-	end
-
 	def test_attr_reader
 		V.keys.each do |k|
 			assert_equal(V[k], @t.send(k))
