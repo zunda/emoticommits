@@ -45,7 +45,13 @@ module GitHubArchive
 	end
 
 	# Errors that parser cannot continue but continue parsing other events
-	class EventParseError < StandardError; end
+	class EventParseIgnorableError < StandardError; end
+
+	# Errors that worth retrying after a short wait
+	class EventParseRetryableError < StandardError; end
+
+	# Errors that worth retrying after a long wait
+	class EventParseToWaitError < StandardError; end
 
 	# based upon http://developer.github.com/v3/activity/events/types/
 	class EventParser
@@ -159,16 +165,16 @@ module GitHubArchive
 			rescue OpenURI::HTTPError => e
 				case e.message[0..2]
 				when '404'	# Not Found
-					raise EventParseError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
-				when '500'	# Internal Server Error
-					raise EventParseError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
-				when '502'	# Bad Gateway
-					raise EventParseError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
+					raise EventParseIgnorableError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
+				when '500', '502'	# Internal Server Error, Bad Gateway
+					raise EventParseRetryableError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
+				when '403'	# Forbidden - we might have hit rate limit
+					raise EventParseToWaitError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
 				else
 					raise e
 				end
 			rescue Net::HTTPBadResponse => e
-				raise EventParseError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
+				raise EventParseRetryableError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
 			end
 		end
 	end

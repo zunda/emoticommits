@@ -51,6 +51,7 @@ dbpath = ARGV.shift
 db = SQLite3Database.open(dbpath)
 db.create_table('events', GitHubArchive::Event.schema)
 
+max_retry =3
 ARGV.each do |src|
 	js = open(src)
 	if src =~ /\.gz\Z/
@@ -58,12 +59,34 @@ ARGV.each do |src|
 	end
 
 	Yajl::Parser.parse(js) do |ev|
+		current_retry = 0
 		begin
 			GitHubArchive::EventParser.parse(ev, dry_run: false, auth: conf.github_auth) do |event|
 				db.insert('events', event)
+				$stderr.print "\r#{event.timestamp.gmtime}"
 			end
-		rescue GitHubArchive::EventParseError => e
-			$stderr.puts e.message
+		rescue GitHubArchive::EventParseIgnorableError => e
+			$stderr.puts e.message, " - moving onto next entry"
+		rescue GitHubArchive::EventParseRetryableError => e
+			if current_retry < max_retry
+				current_retry += 1
+				$stderr.puts e.message, " - retrying after 1 sec(#{current_retry})"
+				sleep(1)
+				retry
+			else
+				$stderr.puts e.message, " - moving onto next entry"
+			end
+		rescue GitHubArchive::EventParseToWaitError => e
+			current_retry += 1
+			if current_retry < max_retry
+				$stderr.puts e.message, " - retrying after 600 sec (#{current_retry})"
+				sleep(600)
+				retry
+			else
+				$stderr.puts e.message, " - retrying after 3600 sec (#{current_retry})"
+				sleep(3600)
+				retry
+			end
 		end
 	end
 end
