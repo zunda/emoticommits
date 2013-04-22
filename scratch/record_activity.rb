@@ -99,4 +99,5 @@ ARGV.each do |src|
 	end
 end
 
+$stderr.puts
 db.close
