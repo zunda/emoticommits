@@ -51,6 +51,14 @@ dbpath = ARGV.shift
 db = SQLite3Database.open(dbpath)
 db.create_table('events', GitHubArchive::Event.schema)
 
+def print_progress(message)
+	$stderr.print "\r#{message}"
+end
+
+def print_error(error, message)
+	$stderr.puts "\r#{error.message.chomp} - #{message}"
+end
+
 max_retry =3
 ARGV.each do |src|
 	js = open(src)
@@ -63,27 +71,27 @@ ARGV.each do |src|
 		begin
 			GitHubArchive::EventParser.parse(ev, dry_run: false, auth: conf.github_auth) do |event|
 				db.insert('events', event)
-				$stderr.print "\r#{event.timestamp.gmtime}"
+				print_progress(event.timestamp.gmtime)
 			end
 		rescue GitHubArchive::EventParseIgnorableError => e
-			$stderr.puts e.message, " - moving onto next entry"
+			print_error(e, "moving onto next entry")
 		rescue GitHubArchive::EventParseRetryableError => e
 			if current_retry < max_retry
 				current_retry += 1
-				$stderr.puts e.message, " - retrying after 1 sec(#{current_retry})"
+				print_error(e, "retrying after 1 sec(#{current_retry})")
 				sleep(1)
 				retry
 			else
-				$stderr.puts e.message, " - moving onto next entry"
+				print_error(e, "moving onto next entry")
 			end
 		rescue GitHubArchive::EventParseToWaitError => e
 			current_retry += 1
 			if current_retry < max_retry
-				$stderr.puts e.message, " - retrying after 600 sec (#{current_retry})"
+				print_error(e, "retrying after 600 sec(#{current_retry})")
 				sleep(600)
 				retry
 			else
-				$stderr.puts e.message, " - retrying after 3600 sec (#{current_retry})"
+				print_error(e, "retrying after 3600 sec(#{current_retry})")
 				sleep(3600)
 				retry
 			end
