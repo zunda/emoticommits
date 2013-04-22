@@ -73,8 +73,8 @@ class SQLite3Database < SQLite3::Database
 			obj = klass.new
 			klass.schema.keys.each_with_index do |key, i|
 				value = row[i]
-				value = Time.at(value) if klass.schema[key] == Time
-				value = (value == 1) if klass.schema[key] == TrueClass
+				value = Time.at(value) if klass.schema[key] == Time and value
+				value = (value == 1) if klass.schema[key] == TrueClass and value
 				obj.send("#{key}=", value)
 			end
 			yield(obj)

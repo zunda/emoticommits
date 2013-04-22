@@ -1,4 +1,8 @@
 #
+# usage: ruby scratch/create_markers.rb location-db-path event-db-path... > json
+# Creates JSON list of markers from known events and locations
+#
+#
 # Copyright (c) 2013 zunda <zunda at freeshell.org>
 #
 # Permission is hereby granted, free of charge, to any person
@@ -22,45 +26,22 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
-require 'yajl'
-
+$:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'githubarchive'
 require 'geocoding'
 require 'sqlite3if'
-require 'emoji'
+require 'marker'
 
-class Marker
-	GravatarUrl = 'http://www.gravatar.com/avatar/%s'
-	EmoticonUrl = 'http://assets.github.com/images/icons/emoji/%s.png'
+locationdb = SQLite3Database.open(ARGV.shift)
 
-	def Marker.schema
-		{'time' => Time, 'emotion' => TrueClass, 'lat' => Float, 'lng' => Float, 'icon' => String, 'url' => String}
-	end
-	include Schemable
-
-	def to_json(*args, &block)
-		hash = {:time => @time.iso8601, :emotion => @emotion, :lat => @lat, :lng => @lng, :icon => @icon, :url => @url}
-		Yajl::Encoder.encode(hash, args, block) + "\n"
-	end
-
-	def initialize(event = nil, geocoding = nil)
-		@time = event.timestamp
-		@lat = geocoding.lat
-		@lng = geocoding.lng
-		@url = event.url
-		emoji = Emoji::Scanner.first_emoji(event.comment)
-		if emoji
-			@emotion = true
-			@icon = EmoticonUrl % emoji[1..-2]	# strip :'s
-		else
-			@emotion = false
-			@icon = GravatarUrl % event.gravatar_id
+markers = Markers.new
+ARGV.each do |eventdbpath|
+	eventdb = SQLite3Database.open(eventdbpath)
+	eventdb.retrieve('events', GitHubArchive::Event, '').each do |event|
+		location = locationdb.retrieve('locations', GoogleApi::Geocoding, 'WHERE address=?', event.location)[0]
+		if location and location.status == 'OK'
+			markers << Marker.new(event, location)
 		end
 	end
 end
-
-class Markers < Array
-	def to_json(*args, &block)
-		Yajl::Encoder.encode(self.sort_by{|x| x.time}, args, block)
-	end
-end
+puts markers.to_json
