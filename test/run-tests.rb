@@ -22,11 +22,6 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 
-require 'test/unit'
-
-$:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
-$:.unshift(File.join(File.dirname(__FILE__), '..', 'test'))
-
 Dir.glob(File.join(File.dirname(__FILE__), '..', 'test', 'test*.rb')) do |file|
 	load file
 end
