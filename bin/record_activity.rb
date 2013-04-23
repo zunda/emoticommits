@@ -111,7 +111,7 @@ Yajl::Parser.parse(js) do |ev|
 	rescue GitHubArchive::EventParseRetryableError => e
 		if current_retry < max_retry
 			current_retry += 1
-			print_error(e, "retrying after 1 sec(#{current_retry})")
+			print_error(e, "retrying after 1 sec (#{current_retry})")
 			sleep(1)
 			retry
 		else
@@ -120,12 +120,12 @@ Yajl::Parser.parse(js) do |ev|
 	rescue GitHubArchive::EventParseToWaitError => e
 		current_retry += 1
 		if current_retry < max_retry
-			print_error(e, "retrying after 600 sec(#{current_retry})")
+			print_error(e, "retrying after 600 sec (#{current_retry})")
 			sleep(600)
 			retry
 		else
-			print_error(e, "retrying after 3600 sec(#{current_retry})")
-			sleep(3600)
+			print_error(e, "retrying after 1800 sec (#{current_retry})")
+			sleep(1800)
 			retry
 		end
 	end
