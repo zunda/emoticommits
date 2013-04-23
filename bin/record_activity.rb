@@ -107,7 +107,7 @@ Yajl::Parser.parse(js) do |ev|
 			locations << event.location
 		end
 	rescue GitHubArchive::EventParseIgnorableError => e
-		print_error(e, "moving onto next entry")
+		#print_error(e, "moving onto next entry")
 	rescue GitHubArchive::EventParseRetryableError => e
 		if current_retry < max_retry
 			current_retry += 1
