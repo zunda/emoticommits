@@ -79,7 +79,7 @@ json_id = File.basename(json_url, '.json.gz')
 $log = Syslog::Logger.new("#{File.basename($0, '.rb')}-#{json_id}")
 $log.info("Starting to parse #{json_url}")
 
-max_retry =3
+max_retry = 3
 current_retry = 0
 begin
 	js = Zlib::GzipReader.new(open(json_url)).read
@@ -93,6 +93,15 @@ rescue OpenURI::HTTPError => e
 			sleep(600)
 			retry
 		end
+	end
+	exit 1
+rescue SocketError, Errno::ENETUNREACH => e	# Temporary failure in name resolution
+	print_error(e, json_url)
+	if current_retry < max_retry
+		current_retry += 1
+		$log.info("  retrying in 600 seconds (#{current_retry})")
+		sleep(600)
+		retry
 	end
 	exit 1
 end

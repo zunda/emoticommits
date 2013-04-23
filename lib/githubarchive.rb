@@ -168,13 +168,15 @@ module GitHubArchive
 					raise EventParseIgnorableError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
 				when '500', '502'	# Internal Server Error, Bad Gateway
 					raise EventParseRetryableError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
-				when '403'	# Forbidden - we might have hit rate limit
+				when '403', '401', '409'	# we might have hit rate limit
 					raise EventParseToWaitError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
 				else
 					raise e
 				end
 			rescue Net::HTTPBadResponse => e
 				raise EventParseRetryableError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
+			rescue SocketError, Errno::ENETUNREACH => e
+				raise EventParseToWaitError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
 			end
 		end
 	end

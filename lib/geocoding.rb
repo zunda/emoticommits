@@ -25,6 +25,7 @@
 require 'open-uri'
 require 'uri'
 require 'yajl'
+require 'socket'
 
 require 'sqlite3if'
 
@@ -53,7 +54,18 @@ module GoogleApi
 		end
 
 		def read(uri = nil)
-			@js = Yajl::Parser.parse(open(uri || @uri, 'User-Agent' => AGENT).read)
+			current_retry = 0
+			max_retry = 3
+			begin
+				@js = Yajl::Parser.parse(open(uri || @uri, 'User-Agent' => AGENT).read)
+			rescue SocketError, Errno::ENETUNREACH => e
+				if current_retry < max_retry
+					current_retry += 1
+					sleep(600)
+					retry
+				end
+				raise e
+			end
 		end
 
 		def parse(timestamp = Time.now)
