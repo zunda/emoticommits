@@ -34,6 +34,7 @@
 require 'open-uri'
 require 'zlib'
 require 'yajl'
+require 'syslog/logger'
 
 $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'githubarchive'
@@ -50,7 +51,7 @@ def githubarchive_url(time)
 end
 
 def print_error(error, message)
-	puts "\r#{error.message.chomp} - #{message}"
+	$log.info("#{error.message.chomp} - #{message}")
 end
 
 class Configuration < ConfigurationBase
@@ -74,7 +75,9 @@ locationdb.create_table('locations', GoogleApi::Geocoding.schema)
 
 # Read githubarchive JSON
 json_url = githubarchive_url(Time.now - offsetmins * 60)
-puts "#{Time.now.strftime("%Y-%m-%d %H:%M:%S %Z")} #{json_url}"
+json_id = File.basename(json_url, '.json.gz')
+$log = Syslog::Logger.new("#{File.basename($0, '.rb')}-#{json_id}")
+$log.info("Starting to parse #{json_url}")
 
 max_retry =3
 current_retry = 0
@@ -86,7 +89,7 @@ rescue OpenURI::HTTPError => e
 		case e.message[0..2]
 		when '404'
 			current_retry += 1
-			puts "  retrying in 600 seconds (#{current_retry})"
+			$log.info("  retrying in 600 seconds (#{current_retry})")
 			sleep(600)
 			retry
 		end
@@ -130,7 +133,7 @@ end
 eventdb.close
 
 # Query some locations
-puts "#{Time.now.strftime("%Y-%m-%d %H:%M:%S %Z")} querying locations"
+$log.info("querying locations")
 
 maxquery = 100
 queries = 0
@@ -138,16 +141,10 @@ locations.shuffle.each do |address|
 	if locationdb.select('COUNT(*) FROM locations WHERE (status = "OK" or status = "ZERO_RESULTS") and address = ?', address)[0][0] < 1
 		location = GoogleApi::Geocoding.query(address)
 		locationdb.insert('locations', location)
-		case location.status
-		when 'OK'
-			puts "#{location.lat},#{location.lng}"
-		else
-			puts location.status
-		end
 		queries += 1
 	end
 	break if queries >= maxquery
 end
 locationdb.close
 
-puts "#{Time.now.strftime("%Y-%m-%d %H:%M:%S %Z")} finished"
+$log.info("finished")
