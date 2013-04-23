@@ -1,0 +1,2 @@
+# m h  dom mon dow   command
+48 * * * * ~/local/bin/ruby ~/local/src/emoticommits/bin/record_activity.rb ~/var/events.sqlite ~/var/locations.sqlite 90
