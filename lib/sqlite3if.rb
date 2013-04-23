@@ -55,7 +55,7 @@ class SQLite3Database < SQLite3::Database
 		rescue SQLite3::BusyException
 			raise if current_retry >= @max_retry
 			current_retry += 1
-			sleep(@timeout)
+			sleep(rand*@timeout + @timeout/2)
 			retry
 		end
 	end
