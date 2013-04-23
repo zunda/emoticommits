@@ -34,11 +34,30 @@ end
 class SQLite3Database < SQLite3::Database
 	SQLite3Types = {Time => 'integer', String => 'text', Float => 'real', TrueClass => 'integer'}
 
+	def initialize(*args)
+		super(*args)
+		@timeout = 0.1
+		@max_retry = 10
+	end
+
 	# Specifies default timeout
 	def open(dbpath, timeout = 100)
 		db = super(dbpath)
 		db.timeout(timeout)
+		@timeout = timeout/1000.0
 		return db
+	end
+
+	def execute_with_retry(sql, *args, &block)
+		current_retry = 0
+		begin
+			execute(sql, *args, &block)
+		rescue SQLite3::BusyException
+			raise if current_retry >= @max_retry
+			current_retry += 1
+			sleep(@timeout)
+			retry
+		end
 	end
 
 	# Creates table with schame as a Hash of key:column-name and value:Ruby type
@@ -46,7 +65,7 @@ class SQLite3Database < SQLite3::Database
 		sql = "CREATE TABLE IF NOT EXISTS #{table} (\n"
 		sql << schema.to_a.map{|row, type| "#{row} #{SQLite3Types[type]}"}.join(",\n")
 		sql << "\n);"
-		execute(sql)
+		execute_with_retry(sql)
 	end
 
 	def insert(table, obj)
@@ -60,16 +79,16 @@ class SQLite3Database < SQLite3::Database
 			value = value ? 1 : 0 if schema[k] == TrueClass
 			value
 		end
-		execute(sql, values)
+		execute_with_retry(sql, values)
 	end
 
 	def select(sql, *args, &block)
-		execute("SELECT #{sql};", *args, &block)
+		execute_with_retry("SELECT #{sql};", *args, &block)
 	end
 
 	def retrieve_with_block(table, klass, where, *args)
 		keys = klass.schema.keys.join(',')
-		execute("SELECT * from #{table} #{where};", *args).each do |row|
+		execute_with_retry("SELECT * from #{table} #{where};", *args).each do |row|
 			obj = klass.new
 			klass.schema.keys.each_with_index do |key, i|
 				value = row[i]
