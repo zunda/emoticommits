@@ -36,8 +36,8 @@ class SQLite3Database < SQLite3::Database
 
 	def initialize(*args)
 		super(*args)
-		@timeout = 0.1
-		@max_retry = 10
+		@timeout = 0.2
+		@max_retry = 20
 	end
 
 	# Specifies default timeout
