@@ -21,7 +21,7 @@
         map = new google.maps.Map(document.getElementById("map-canvas"),
           mapOptions);
       };
-      function droppin(lat, lng, icon, size) {
+      function droppin(lat, lng, icon, size, linkurl) {
         marker = new google.maps.Marker({
           map: map,
           draggable: false,
@@ -33,6 +33,9 @@
             anchor: new google.maps.Point(size/2, size/2),
           }
         })
+				google.maps.event.addListener(marker, 'click', function(){
+					window.open(linkurl);
+				});
         return marker;
       };
       function removepin(marker) {
