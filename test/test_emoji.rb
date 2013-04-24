@@ -63,4 +63,8 @@ class TestScanner < Test::Unit::TestCase
 	def test_no_detection_with_space
 		assert_equal(nil, Emoji::Scanner.first_emoji(':smi le:'))
 	end
+
+	def test_nil
+		assert_equal(nil, Emoji::Scanner.first_emoji(nil))
+	end
 end

@@ -27,6 +27,7 @@ require 'emojis'
 module Emoji
 	class Scanner
 		def Scanner.first_emoji(string)
+			return nil unless string
 			e = string.scan(%r|:([\w\+\-]+):|)[0]
 			return e && e[0] && EMOJIS.include?(e[0]) ? ":#{e[0]}:" : nil
 		end
