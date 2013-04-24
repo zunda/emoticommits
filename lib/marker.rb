@@ -40,7 +40,7 @@ class Marker
 
 	def to_json(*args, &block)
 		hash = {:time => @time.iso8601, :emotion => @emotion, :lat => @lat, :lng => @lng, :icon => @icon, :url => @url}
-		Yajl::Encoder.encode(hash, args, block) + "\n"
+		Yajl::Encoder.encode(hash, args, block)
 	end
 
 	def initialize(event = nil, geocoding = nil)
