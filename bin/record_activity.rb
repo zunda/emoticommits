@@ -54,6 +54,10 @@ def print_error(error, message)
 	$log.info("#{error.message.chomp} - #{message}")
 end
 
+def random_wait(seconds)
+	sleep(seconds*random + seconds/2)
+end
+
 class Configuration < ConfigurationBase
 	attr_reader :github_auth
 end
@@ -89,8 +93,9 @@ rescue OpenURI::HTTPError => e
 		case e.message[0..2]
 		when '404'
 			current_retry += 1
-			$log.info("  retrying in 600 seconds (#{current_retry})")
-			sleep(600)
+			$log.info("  retrying in about 600 seconds (#{current_retry})")
+			random_sleep(600)
+			$log.info("resuming ...")
 			retry
 		end
 	end
@@ -99,8 +104,9 @@ rescue SocketError, Errno::ENETUNREACH => e	# Temporary failure in name resoluti
 	print_error(e, json_url)
 	if current_retry < max_retry
 		current_retry += 1
-		$log.info("  retrying in 600 seconds (#{current_retry})")
-		sleep(600)
+		$log.info("  retrying in about 600 seconds (#{current_retry})")
+		random_sleep(600)
+		$log.info("resuming ...")
 		retry
 	end
 	exit 1
@@ -120,21 +126,24 @@ Yajl::Parser.parse(js) do |ev|
 	rescue GitHubArchive::EventParseRetryableError => e
 		if current_retry < max_retry
 			current_retry += 1
-			print_error(e, "retrying after 1 sec (#{current_retry})")
-			sleep(1)
+			print_error(e, "retrying after about 1 sec (#{current_retry})")
+			random_sleep(1)
 			retry
 		else
 			print_error(e, "moving onto next entry")
 		end
 	rescue GitHubArchive::EventParseToWaitError => e
+		print_error(e, "retrying in about 600 sec (#{current_retry})")
 		current_retry += 1
 		if current_retry < max_retry
-			print_error(e, "retrying after 600 sec (#{current_retry})")
-			sleep(600)
+			$log.info("  retrying in about 600 sec (#{current_retry})")
+			random_sleep(600)
+			$log.info("resuming ...")
 			retry
 		else
-			print_error(e, "retrying after 1800 sec (#{current_retry})")
-			sleep(1800)
+			$log.info("  retrying in about 1800 sec (#{current_retry})")
+			random_sleep(1800)
+			$log.info("resuming ...")
 			retry
 		end
 	end
