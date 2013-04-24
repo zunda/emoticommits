@@ -74,14 +74,17 @@ offsetmins = Integer(ARGV.shift)
 # Databases
 eventdb = SQLite3Database.open(eventdbpath)
 eventdb.create_table('events', GitHubArchive::Event.schema)
+processed_events = 0
 locationdb = SQLite3Database.open(locationdbpath)
 locationdb.create_table('locations', GoogleApi::Geocoding.schema)
+processed_addresses = 0
 
 # Read githubarchive JSON
 json_url = githubarchive_url(Time.now - offsetmins * 60)
 json_id = File.basename(json_url, '.json.gz')
 $log = Syslog::Logger.new("#{File.basename($0, '.rb')}-#{json_id}")
 $log.info("Starting to parse #{json_url}")
+at_exit{$log.info("exiting after processing #{processed_events} events and #{processed_addresses} addresses")}
 
 max_retry = 3
 current_retry = 0
@@ -147,6 +150,7 @@ Yajl::Parser.parse(js) do |ev|
 			retry
 		end
 	end
+	processed_events += 1
 end
 eventdb.close
 
@@ -161,6 +165,7 @@ locations.shuffle.each do |address|
 		locationdb.insert('locations', location)
 		queries += 1
 	end
+	processed_addresses += 1
 	break if queries >= maxquery
 end
 locationdb.close
