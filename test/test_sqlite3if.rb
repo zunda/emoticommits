@@ -52,6 +52,8 @@ class TestSQLite3Database < Test::Unit::TestCase
 			assert_equal(obj.string, t.string)
 			assert_equal(obj.integer, t.integer)
 			assert_equal(obj.float, t.float)
+			db.close
+			File.unlink(dbpath)
 		end
 	end
 
@@ -82,6 +84,8 @@ class TestSQLite3Database < Test::Unit::TestCase
 			assert_equal(obj[1].string, u.string)
 			assert_equal(obj[1].integer, u.integer)
 			assert_equal(obj[1].float, u.float)
+			db.close
+			File.unlink(dbpath)
 		end
 	end
 
@@ -115,6 +119,8 @@ class TestSQLite3Database < Test::Unit::TestCase
 			assert_equal(r[1].string, u.string)
 			assert_equal(r[1].integer, u.integer)
 			assert_equal(r[1].float, u.float)
+			db.close
+			File.unlink(dbpath)
 		end
 	end
 end
