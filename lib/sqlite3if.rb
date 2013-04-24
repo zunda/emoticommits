@@ -36,7 +36,7 @@ class SQLite3Database < SQLite3::Database
 
 	def initialize(*args)
 		super(*args)
-		@timeout = 0.2
+		@timeout = 3.0
 		@max_retry = 20
 	end
 
@@ -55,7 +55,7 @@ class SQLite3Database < SQLite3::Database
 		rescue SQLite3::BusyException
 			raise if current_retry >= @max_retry
 			current_retry += 1
-			sleep(rand*@timeout + @timeout/2)
+			sleep((rand + 0.5)*@timeout)
 			retry
 		end
 	end
