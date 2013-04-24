@@ -57,10 +57,11 @@ module GitHubArchive
 	class EventParser
 		# yeilds Event
 		# auth: [user, password]
-		def EventParser.parse(js, opts = {dry_run: false, auth: nil})
+		def EventParser.parse(js, opts = {dry_run: false, auth: nil, minimal: true})
 			begin
 				dry_run = opts[:dry_run]
 				auth = opts[:auth]
+				minimal = opts[:minimal]
 
 				actor = js['actor_attributes']
 				return unless actor
@@ -92,6 +93,7 @@ module GitHubArchive
 				when 'DeleteEvent'
 					return	# nothing interesting
 				when 'DownloadEvent'
+					return if minimal
 					unless dry_run
 						c = GitHubApi::Download.new(js['repository']['owner'], js['repository']['name'], js['payload']['id'], auth: auth)
 						c.read_and_parse
@@ -108,6 +110,7 @@ module GitHubArchive
 				when 'ForkApplyEvent'
 					return	# no example found for now. I will come back later
 				when 'GistEvent'
+					return if minimal
 					unless dry_run
 						c = GitHubApi::Gist.new(js['payload']['id'], auth: auth)
 						c.read_and_parse
