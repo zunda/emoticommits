@@ -11,11 +11,53 @@
 
     <title>Emoticommits</title>
     <script type="text/javascript">
-      var marker = null;
+      var markers = new Array;
+      function loadMarkers(basename) {
+        var http = new XMLHttpRequest();
+        http.open('GET', "markers/" + basename + ".json");
+        http.send(null);
+        http.onreadystatechange = function() {
+          if ((http.readyState == 4) && (http.status == 200)) {
+            JSON.parse(http.responseText).forEach(function(marker) {
+              markers.push(marker);
+            });
+            initializeClocks();
+          };
+        };
+      };
+      function addMarkers(page_time) {
+        while(markers.length > 0 && new Date(markers[0].time) < page_time) {
+          var marker = markers.shift();
+          var icon = marker.icon;
+          var size = 48;
+          if (!marker.emotion) {
+            size = 32;
+            icon += "?s=32";
+          };
+          mapwindow.dropPin(marker.lat, marker.lng, icon, size, marker.url);
+        };
+      };
+
+      var time_offset;
+      function updateClocks() {
+        var wall_time = new Date();
+        var page_time = new Date(wall_time.getTime() + time_offset);
+        document.getElementById("wall_clock").innerHTML = wall_time.toLocaleString();
+        document.getElementById("page_clock").innerHTML = page_time.toLocaleString();
+        addMarkers(page_time);
+      };
+      function initializeClocks() {
+        var wall_time_start = new Date();
+        var page_time_start = new Date(markers[0].time);
+        time_offset = page_time_start.getTime() - wall_time_start.getTime();
+        setInterval(function(){updateClocks()}, 500);
+      };
+
       var mapwindow;
       function initialize() {
         mapwindow = document.getElementById("mapframe").contentWindow;
-      }
+        loadMarkers("2013042322");
+      };
       window.onload = initialize;
     </script>
   </head>
@@ -36,17 +78,10 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
+        <p><span id="wall_clock">Wall clock</span> <span id="page_clock">Page clock</span></p>
         <iframe id="mapframe" src="./map.html"
           height="100%" width="100%" frameBorder="0" scrolling="no">
         </iframe>
-        <form>
-          <input type="button" value="Avatar!"
-            onClick="if (marker == null) { marker = mapwindow.droppin(19.7297222, -155.09, 'http://www.gravatar.com/avatar/a57266327b9987be214f5ed7d145dbae?s=32', 32, 'http://www.google.com/'); }">
-          <input type="button" value="Smiley!"
-            onClick="if (marker == null) { marker = mapwindow.droppin(19.7297222, -155.09, 'http://a248.e.akamai.net/assets.github.com/images/icons/emoji/smiley.png', 48, 'http://github.com/'); }">
-          <input type="button" value="Clear"
-            onClick="mapwindow.removepin(marker); marker = null">
-        </form>
       </section>
     </div>
 
