@@ -55,7 +55,7 @@ def print_error(error, message)
 end
 
 def random_wait(seconds)
-	sleep(seconds*random + seconds/2)
+	sleep((rand + 0.5) * seconds)
 end
 
 class Configuration < ConfigurationBase
@@ -97,7 +97,7 @@ rescue OpenURI::HTTPError => e
 		when '404'
 			current_retry += 1
 			$log.info("  retrying in about 600 seconds (#{current_retry})")
-			random_sleep(600)
+			random_wait(600)
 			$log.info("resuming ...")
 			retry
 		end
@@ -108,7 +108,7 @@ rescue SocketError, Errno::ENETUNREACH => e	# Temporary failure in name resoluti
 	if current_retry < max_retry
 		current_retry += 1
 		$log.info("  retrying in about 600 seconds (#{current_retry})")
-		random_sleep(600)
+		random_wait(600)
 		$log.info("resuming ...")
 		retry
 	end
@@ -130,7 +130,7 @@ Yajl::Parser.parse(js) do |ev|
 		if current_retry < max_retry
 			current_retry += 1
 			print_error(e, "retrying after about 1 sec (#{current_retry})")
-			random_sleep(1)
+			random_wait(1)
 			retry
 		else
 			print_error(e, "moving onto next entry")
@@ -140,12 +140,12 @@ Yajl::Parser.parse(js) do |ev|
 		current_retry += 1
 		if current_retry < max_retry
 			$log.info("  retrying in about 600 sec (#{current_retry})")
-			random_sleep(600)
+			random_wait(600)
 			$log.info("resuming ...")
 			retry
 		else
 			$log.info("  retrying in about 1800 sec (#{current_retry})")
-			random_sleep(1800)
+			random_wait(1800)
 			$log.info("resuming ...")
 			retry
 		end
