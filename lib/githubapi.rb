@@ -35,10 +35,16 @@ module GitHubApi
 
 		attr_reader :json_url
 		attr_reader :js
-		attr_reader :timestamp
+		attr_accessor :timestamp
 
+		# From GitHub API
 		attr_reader :comment
 		attr_reader :html_url
+
+		# From parent JSON from GitHub Archive
+		attr_accessor :location
+		attr_accessor :avatar
+		attr_accessor :type
 
 		def initialize(json_url, opts = {auth: []})
 			@json_url = json_url
