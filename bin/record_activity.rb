@@ -35,6 +35,7 @@ require 'open-uri'
 require 'zlib'
 require 'yajl'
 require 'syslog/logger'
+require 'timeout'
 
 $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'githubarchive'
@@ -76,6 +77,7 @@ end
 eventdbpath = ARGV.shift
 locationdbpath = ARGV.shift
 offsetmins = Integer(ARGV.shift)
+github_api_timeout = 40 * 60	# seconds (40 minutes) before quiting queries to GitHub API
 
 # Databases
 eventdb = SQLite3Database.open(eventdbpath)
@@ -141,39 +143,43 @@ begin
 
 	# Then try querying GitHub API for additional information
 	print_message($log, "Querying GitHub API")
-	parser.api_queries.shuffle.each do |query|
-		current_retry = 0
-		begin
-			GitHubArchive::EventParser.query_api(query) do |event|
-				eventdb.insert('events', event)
-				locations << event.location
-				processed_events += 1
-			end
-		rescue GitHubArchive::EventParseIgnorableError => e
-			#print_error($log, e, "moving onto next entry")
-		rescue GitHubArchive::EventParseRetryableError => e
-			current_retry += 1
-			if current_retry < max_retry
-				print_error($log, e, "retrying after about 1 sec (#{current_retry})")
-				random_wait(1)
-				retry
-			else
-				print_error($log, e, "moving onto next entry")
-			end
-		rescue GitHubArchive::EventParseToWaitError => e
-			current_retry += 1
-			if current_retry < max_retry
-				print_error($log, e, "retrying in about 600 sec (#{current_retry})")
-				random_wait(600)
-				$log.info("resuming ...")
-				retry
-			else
-				print_error($log, e, "Giving up (#{current_retry})")
-				raise GiveUp
+	Timeout.timeout(github_api_timeout) do
+		parser.api_queries.shuffle.each do |query|
+			current_retry = 0
+			begin
+				GitHubArchive::EventParser.query_api(query) do |event|
+					eventdb.insert('events', event)
+					locations << event.location
+					processed_events += 1
+				end
+			rescue GitHubArchive::EventParseIgnorableError => e
+				#print_error($log, e, "moving onto next entry")
+			rescue GitHubArchive::EventParseRetryableError => e
+				current_retry += 1
+				if current_retry < max_retry
+					print_error($log, e, "retrying after about 1 sec (#{current_retry})")
+					random_wait(1)
+					retry
+				else
+					print_error($log, e, "moving onto next entry")
+				end
+			rescue GitHubArchive::EventParseToWaitError => e
+				current_retry += 1
+				if current_retry < max_retry
+					print_error($log, e, "retrying in about 600 sec (#{current_retry})")
+					random_wait(600)
+					$log.info("resuming ...")
+					retry
+				else
+					print_error($log, e, "Giving up (#{current_retry})")
+					raise GiveUp
+				end
 			end
 		end
 	end
 rescue GiveUp
+rescue TimeoutError
+	print_message($log, "Time up querying GitHub API")
 end
 eventdb.close
 
