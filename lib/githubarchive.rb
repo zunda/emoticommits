@@ -57,11 +57,10 @@ module GitHubArchive
 	class EventParser
 		# yeilds Event
 		# auth: [user, password]
-		def EventParser.parse(js, opts = {dry_run: false, auth: nil, minimal: true})
+		def EventParser.parse(js, opts = {dry_run: false, auth: nil})
 			begin
 				dry_run = opts[:dry_run]
 				auth = opts[:auth]
-				minimal = opts[:minimal]
 
 				actor = js['actor_attributes']
 				return unless actor
@@ -78,9 +77,9 @@ module GitHubArchive
 					unless dry_run
 						c = GitHubApi::SingleCommitComment.new(js['repository']['owner'], js['repository']['name'], js['payload']['comment_id'], auth: auth)
 						c.read_and_parse
-						comment = c.js['body']
+						comment = c.comment
 						timestamp = c.timestamp
-						url = c.js['html_url']
+						url = c.html_url
 					end
 					yield Event.new(timestamp || Time.parse(js['created_at']), comment, loc, url, type, avatar)
 					return
@@ -93,13 +92,12 @@ module GitHubArchive
 				when 'DeleteEvent'
 					return	# nothing interesting
 				when 'DownloadEvent'
-					return if minimal
 					unless dry_run
 						c = GitHubApi::Download.new(js['repository']['owner'], js['repository']['name'], js['payload']['id'], auth: auth)
 						c.read_and_parse
-						comment = c.js['description']
+						comment = c.comment
 						timestamp = c.timestamp
-						url = c.js['html_url']
+						url = c.html_url
 					end
 					yield Event.new(timestamp, comment, loc, url, type, avatar)
 					return
@@ -110,13 +108,12 @@ module GitHubArchive
 				when 'ForkApplyEvent'
 					return	# no example found for now. I will come back later
 				when 'GistEvent'
-					return if minimal
 					unless dry_run
 						c = GitHubApi::Gist.new(js['payload']['id'], auth: auth)
 						c.read_and_parse
-						comment = c.js['description']
+						comment = c.comment
 						timestamp = c.timestamp
-						url = c.js['html_url']
+						url = c.html_url
 					end
 					yield Event.new(timestamp || Time.parse(js['created_at']), comment, loc, url, type, avatar)
 					return
@@ -134,9 +131,9 @@ module GitHubArchive
 					unless dry_run
 						c = GitHubApi::SinglePullRequest.new(js['repository']['owner'], js['repository']['name'], js['payload']['number'], auth: auth)
 						c.read_and_parse
-						comment = c.js['body']
+						comment = c.comment
 						timestamp = c.timestamp
-						url = c.js['html_url']
+						url = c.html_url
 					end
 					yield Event.new(timestamp || Time.parse(js['created_at']), comment, loc, url, type, avatar)
 					return
@@ -151,9 +148,9 @@ module GitHubArchive
 						js['payload']['shas'].each do |sha, email, message, name, distinct|
 							c = GitHubApi::Commit.new(js['repository']['owner'], js['repository']['name'], sha, auth: auth)
 							c.read_and_parse
-							comment = c.js['commit']['message']
+							comment = c.comment
 							timestamp = c.timestamp
-							url = c.js['html_url']
+							url = c.html_url
 							yield Event.new(timestamp, comment, loc, url, type, avatar)
 						end
 					else
