@@ -137,6 +137,7 @@ module GitHubArchive
 				yield Event.new(timestamp, comment, loc, url, type, avatar)
 				return
 			when 'PushEvent'
+				return unless js['repository']
 				js['payload']['shas'].each do |sha, email, message, name, distinct|
 					c = GitHubApi::Commit.new(js['repository']['owner'], js['repository']['name'], sha, auth: @auth)
 					c.location = loc
