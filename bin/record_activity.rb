@@ -125,6 +125,8 @@ rescue SocketError, Errno::ENETUNREACH => e	# Temporary failure in name resoluti
 end
 
 # Parse githubarchive JSON
+total_query = 0
+i_query = 0
 locations = Array.new
 begin
 	raise GiveUp unless js
@@ -143,6 +145,8 @@ begin
 
 	# Then try querying GitHub API for additional information
 	print_message($log, "Querying GitHub API")
+	total_query = parser.api_queries.size
+	i_query = 0
 	Timeout.timeout(github_api_timeout) do
 		parser.api_queries.shuffle.each do |query|
 			current_retry = 0
@@ -150,6 +154,7 @@ begin
 				GitHubArchive::EventParser.query_api(query) do |event|
 					eventdb.insert('events', event)
 					locations << event.location
+					i_query += 1
 					processed_events += 1
 				end
 			rescue GitHubArchive::EventParseIgnorableError => e
@@ -179,7 +184,7 @@ begin
 	end
 rescue GiveUp
 rescue TimeoutError
-	print_message($log, "Time up querying GitHub API")
+	print_message($log, "Time out for querying GitHub API. #{"%.0f" % (100.0 * i_query / total_query)}% complete")
 end
 eventdb.close
 
