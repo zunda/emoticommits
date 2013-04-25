@@ -172,11 +172,12 @@ module GitHubArchive
 				else
 					raise e
 				end
-			rescue Net::HTTPBadResponse => e
+			rescue Net::HTTPBadResponse, Errno::ETIMEDOUT => e
 				message = "#{e.message} (#{e.class}) for #{api_query.json_url} from #{api_query.type}"
-				raise EventParseRetryableError.new(mesage)
+				raise EventParseRetryableError.new(message)
 			rescue SocketError, Errno::ENETUNREACH => e
-				raise EventParseToWaitError.new(mesage)
+				message = "#{e.message} (#{e.class}) for #{api_query.json_url} from #{api_query.type}"
+				raise EventParseToWaitError.new(message)
 			end
 		end
 	end
