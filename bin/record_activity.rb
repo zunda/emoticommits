@@ -50,13 +50,19 @@ def githubarchive_url(time)
 	return r
 end
 
-def print_error(error, message)
-	$log.info("#{error.message.chomp} - #{message}")
+def print_error(log, error, message)
+	print_message(log, "#{error.message.chomp} - #{message}")
+end
+
+def print_message(log, message)
+	log.info(message)
 end
 
 def random_wait(seconds)
 	sleep((rand + 0.5) * seconds)
 end
+
+class GiveUp < StandardError; end
 
 class Configuration < ConfigurationBase
 	attr_reader :github_auth
@@ -83,79 +89,80 @@ processed_addresses = 0
 json_url = githubarchive_url(Time.now - offsetmins * 60)
 json_id = File.basename(json_url, '.json.gz')
 $log = Syslog::Logger.new("#{File.basename($0, '.rb')}-#{json_id}")
-$log.info("Starting to parse #{json_url}")
-at_exit{$log.info("exiting after processing #{processed_events} events and #{processed_addresses} addresses")}
+print_message($log, "Starting to parse #{json_url}")
+at_exit{print_message($log, "exiting after processing #{processed_events} events and #{processed_addresses} addresses")}
 
-max_retry = 3
+max_retry = 2
 current_retry = 0
+js = nil
 begin
 	js = Zlib::GzipReader.new(open(json_url)).read
 rescue OpenURI::HTTPError => e
-	print_error(e, json_url)
+	print_error($log, e, json_url)
 	if current_retry < max_retry
 		case e.message[0..2]
 		when '404'
 			current_retry += 1
-			$log.info("  retrying in about 600 seconds (#{current_retry})")
+			print_message($log, "retrying in about 600 seconds (#{current_retry})")
 			random_wait(600)
-			$log.info("resuming ...")
+			print_message($log, "resuming ...")
 			retry
 		end
 	end
-	exit 1
+	print_message($log, "Giving up")
 rescue SocketError, Errno::ENETUNREACH => e	# Temporary failure in name resolution
-	print_error(e, json_url)
+	print_error($log, e, json_url)
 	if current_retry < max_retry
 		current_retry += 1
-		$log.info("  retrying in about 600 seconds (#{current_retry})")
+		print_message($log, "retrying in about 600 seconds (#{current_retry})")
 		random_wait(600)
-		$log.info("resuming ...")
+		print_message($log, "resuming ...")
 		retry
 	end
-	exit 1
+	print_message($log, "Giving up")
 end
 
 # Parse githubarchive JSON
 locations = Array.new
-Yajl::Parser.parse(js) do |ev|
-	current_retry = 0
-	begin
-		GitHubArchive::EventParser.parse(ev, dry_run: false, auth: conf.github_auth) do |event|
-			eventdb.insert('events', event)
-			locations << event.location
-		end
-	rescue GitHubArchive::EventParseIgnorableError => e
-		#print_error(e, "moving onto next entry")
-	rescue GitHubArchive::EventParseRetryableError => e
-		if current_retry < max_retry
+begin
+	js and Yajl::Parser.parse(js) do |ev|
+		current_retry = 0
+		begin
+			GitHubArchive::EventParser.parse(ev, dry_run: false, auth: conf.github_auth) do |event|
+				eventdb.insert('events', event)
+				locations << event.location
+			end
+		rescue GitHubArchive::EventParseIgnorableError => e
+			#print_error($log, e, "moving onto next entry")
+		rescue GitHubArchive::EventParseRetryableError => e
+			if current_retry < max_retry
+				current_retry += 1
+				print_error($log, e, "retrying after about 1 sec (#{current_retry})")
+				random_wait(1)
+				retry
+			else
+				print_error($log, e, "moving onto next entry")
+			end
+		rescue GitHubArchive::EventParseToWaitError => e
 			current_retry += 1
-			print_error(e, "retrying after about 1 sec (#{current_retry})")
-			random_wait(1)
-			retry
-		else
-			print_error(e, "moving onto next entry")
+			if current_retry < max_retry
+				print_error($log, e, "retrying in about 600 sec (#{current_retry})")
+				random_wait(600)
+				$log.info("resuming ...")
+				retry
+			else
+				print_error($log, e, "Giving up")
+				raise GiveUp
+			end
 		end
-	rescue GitHubArchive::EventParseToWaitError => e
-		print_error(e, "retrying in about 600 sec (#{current_retry})")
-		current_retry += 1
-		if current_retry < max_retry
-			$log.info("  retrying in about 600 sec (#{current_retry})")
-			random_wait(600)
-			$log.info("resuming ...")
-			retry
-		else
-			$log.info("  retrying in about 1800 sec (#{current_retry})")
-			random_wait(1800)
-			$log.info("resuming ...")
-			retry
-		end
+		processed_events += 1
 	end
-	processed_events += 1
+rescue GiveUp
 end
 eventdb.close
 
 # Query some locations
-$log.info("querying locations")
+print_message($log, "querying locations")
 
 maxquery = 100
 queries = 0
@@ -170,4 +177,4 @@ locations.shuffle.each do |address|
 end
 locationdb.close
 
-$log.info("finished")
+print_message($log, "finished")
