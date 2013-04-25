@@ -76,7 +76,7 @@ end
 eventdbpath = ARGV.shift
 locationdbpath = ARGV.shift
 offsetmins = Integer(ARGV.shift)
-github_api_timeout = 40 * 60	# seconds (40 minutes) before quiting queries to GitHub API
+github_api_timeout = 60 * 60	# seconds (60 minutes) before quiting queries to GitHub API
 
 # Databases
 eventdb = SQLite3Database.open(eventdbpath)
