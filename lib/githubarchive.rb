@@ -55,14 +55,17 @@ module GitHubArchive
 
 	# based upon http://developer.github.com/v3/activity/events/types/
 	class EventParser
+		def initialize(js, opts = {dry_run: false, auth: nil})
+			@js = js
+			@dry_run = opts[:dry_run]
+			@auth = opts[:auth]
+		end
+
 		# yeilds Event
 		# auth: [user, password]
-		def EventParser.parse(js, opts = {dry_run: false, auth: nil})
+		def parse
 			begin
-				dry_run = opts[:dry_run]
-				auth = opts[:auth]
-
-				actor = js['actor_attributes']
+				actor = @js['actor_attributes']
 				return unless actor
 
 				loc = actor['location']
@@ -70,30 +73,30 @@ module GitHubArchive
 				avatar = actor['gravatar_id']
 				return unless avatar
 
-				type = js['type']
+				type = @js['type']
 				c = nil
 				case type
 				when 'CommitCommentEvent'
-					unless dry_run
-						c = GitHubApi::SingleCommitComment.new(js['repository']['owner'], js['repository']['name'], js['payload']['comment_id'], auth: auth)
+					unless @dry_run
+						c = GitHubApi::SingleCommitComment.new(@js['repository']['owner'], @js['repository']['name'], @js['payload']['comment_id'], auth: @auth)
 						c.read_and_parse
 						comment = c.comment
 						timestamp = c.timestamp
 						url = c.html_url
 					end
-					yield Event.new(timestamp || Time.parse(js['created_at']), comment, loc, url, type, avatar)
+					yield Event.new(timestamp || Time.parse(@js['created_at']), comment, loc, url, type, avatar)
 					return
 				when 'CreateEvent'
-					comment = js['payload']['description']
-					timestamp = Time.parse(js['created_at'])
-					url = js['url']
+					comment = @js['payload']['description']
+					timestamp = Time.parse(@js['created_at'])
+					url = @js['url']
 					yield Event.new(timestamp, comment, loc, url, type, avatar)
 					return
 				when 'DeleteEvent'
 					return	# nothing interesting
 				when 'DownloadEvent'
-					unless dry_run
-						c = GitHubApi::Download.new(js['repository']['owner'], js['repository']['name'], js['payload']['id'], auth: auth)
+					unless @dry_run
+						c = GitHubApi::Download.new(@js['repository']['owner'], @js['repository']['name'], @js['payload']['id'], auth: @auth)
 						c.read_and_parse
 						comment = c.comment
 						timestamp = c.timestamp
@@ -108,14 +111,14 @@ module GitHubArchive
 				when 'ForkApplyEvent'
 					return	# no example found for now. I will come back later
 				when 'GistEvent'
-					unless dry_run
-						c = GitHubApi::Gist.new(js['payload']['id'], auth: auth)
+					unless @dry_run
+						c = GitHubApi::Gist.new(@js['payload']['id'], auth: @auth)
 						c.read_and_parse
 						comment = c.comment
 						timestamp = c.timestamp
 						url = c.html_url
 					end
-					yield Event.new(timestamp || Time.parse(js['created_at']), comment, loc, url, type, avatar)
+					yield Event.new(timestamp || Time.parse(@js['created_at']), comment, loc, url, type, avatar)
 					return
 				when 'GollumEvent'
 					return	# ignore for now
@@ -128,25 +131,25 @@ module GitHubArchive
 				when 'PublicEvent'
 					return	# emotions, if there are, are not from the event
 				when 'PullRequestEvent'
-					unless dry_run
-						c = GitHubApi::SinglePullRequest.new(js['repository']['owner'], js['repository']['name'], js['payload']['number'], auth: auth)
+					unless @dry_run
+						c = GitHubApi::SinglePullRequest.new(@js['repository']['owner'], @js['repository']['name'], @js['payload']['number'], auth: @auth)
 						c.read_and_parse
 						comment = c.comment
 						timestamp = c.timestamp
 						url = c.html_url
 					end
-					yield Event.new(timestamp || Time.parse(js['created_at']), comment, loc, url, type, avatar)
+					yield Event.new(timestamp || Time.parse(@js['created_at']), comment, loc, url, type, avatar)
 					return
 				when 'PullRequestReviewCommentEvent'
-					comment = js['payload']['comment']['body']
-					timestamp = Time.parse(js['created_at'])
-					url = js['payload']['comment']['html_url']
+					comment = @js['payload']['comment']['body']
+					timestamp = Time.parse(@js['created_at'])
+					url = @js['payload']['comment']['html_url']
 					yield Event.new(timestamp, comment, loc, url, type, avatar)
 					return
 				when 'PushEvent'
-					unless dry_run
-						js['payload']['shas'].each do |sha, email, message, name, distinct|
-							c = GitHubApi::Commit.new(js['repository']['owner'], js['repository']['name'], sha, auth: auth)
+					unless @dry_run
+						@js['payload']['shas'].each do |sha, email, message, name, distinct|
+							c = GitHubApi::Commit.new(@js['repository']['owner'], @js['repository']['name'], sha, auth: @auth)
 							c.read_and_parse
 							comment = c.comment
 							timestamp = c.timestamp
@@ -154,7 +157,7 @@ module GitHubArchive
 							yield Event.new(timestamp, comment, loc, url, type, avatar)
 						end
 					else
-						yield Event.new(Time.parse(js['created_at']), nil, loc, nil, type, avatar)
+						yield Event.new(Time.parse(@js['created_at']), nil, loc, nil, type, avatar)
 					end
 					return
 				when 'TeamAddEvent'
@@ -165,19 +168,23 @@ module GitHubArchive
 			rescue OpenURI::HTTPError => e
 				case e.message[0..2]
 				when '404'	# Not Found
-					raise EventParseIgnorableError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
+					raise EventParseIgnorableError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{@js['created_at']}")
 				when '500', '502'	# Internal Server Error, Bad Gateway
-					raise EventParseRetryableError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
+					raise EventParseRetryableError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{@js['created_at']}")
 				when '403', '401', '409'	# we might have hit rate limit
-					raise EventParseToWaitError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
+					raise EventParseToWaitError.new("#{e.message} (#{e.class}) for #{c.json_url} from #{type} created_at #{@js['created_at']}")
 				else
 					raise e
 				end
 			rescue Net::HTTPBadResponse => e
-				raise EventParseRetryableError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
+				raise EventParseRetryableError.new("#{e.message} (#{e.class}) for #{c.json_url} from #{type} created_at #{@js['created_at']}")
 			rescue SocketError, Errno::ENETUNREACH => e
-				raise EventParseToWaitError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
+				raise EventParseToWaitError.new("#{e.message} (#{e.class}) for #{c.json_url} from #{type} created_at #{@js['created_at']}")
 			end
+		end
+
+		def EventParser.parse(js, opts = {dry_run: false, auth: nil}, &block)
+			EventParser.new(js, opts = {dry_run: false, auth: nil}).parse(&block)
 		end
 	end
 end
