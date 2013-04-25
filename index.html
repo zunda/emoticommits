@@ -11,7 +11,13 @@
 
     <title>Emoticommits</title>
     <script type="text/javascript">
-      var markers = new Array;
+      var avatar_duration = 600*1000; // 10 min
+      var avatar_size = 32;
+      var emoticon_duration = 1800*1000;  // 30 min
+      var emoticon_size = 48;
+
+      var markers_queue = new Array;
+      var markers_on_map = new Array;
       function loadMarkers(basename) {
         var http = new XMLHttpRequest();
         http.open('GET', "markers/" + basename + ".json");
@@ -19,24 +25,35 @@
         http.onreadystatechange = function() {
           if ((http.readyState == 4) && (http.status == 200)) {
             JSON.parse(http.responseText).forEach(function(marker) {
-              markers.push(marker);
+              markers_queue.push(marker);
             });
             initializeClocks();
           };
         };
       };
-      function addMarkers(page_time) {
-        while(markers.length > 0 && new Date(markers[0].time) < page_time) {
-          var marker = markers.shift();
+      function addMarkers(page_time, wall_time) {
+        while(markers_queue.length > 0 && new Date(markers_queue[0].time) < page_time) {
+          var marker = markers_queue.shift();
           var icon = marker.icon;
-          var size = 48;
-          if (!marker.emotion) {
-            size = 32;
-            icon += "?s=32";
+          var size;
+          var until;
+          if (marker.emotion) {
+            size = emoticon_size;
+            until = new Date(wall_time.getTime() + emoticon_duration);
+          } else {
+            size = avatar_size;
+            icon += "?s=" + size;
+            until = new Date(wall_time.getTime() + avatar_duration);
           };
-          mapwindow.dropPin(marker.lat, marker.lng, icon, size, marker.url);
+          var pin = mapwindow.dropPin(marker.lat, marker.lng, icon, size, marker.url);
+          markers_on_map.push({until: until, marker: pin});
         };
       };
+      function removeMarkers(wall_time) {
+        while(markers_on_map.length > 0 && markers_on_map[0].until < wall_time) {
+          markers_on_map.shift().marker.setMap(null);
+        }
+      }
 
       var time_offset;
       function updateClocks() {
@@ -44,11 +61,12 @@
         var page_time = new Date(wall_time.getTime() + time_offset);
         document.getElementById("wall_clock").innerHTML = wall_time.toLocaleString();
         document.getElementById("page_clock").innerHTML = page_time.toLocaleString();
-        addMarkers(page_time);
+        addMarkers(page_time, wall_time);
+        removeMarkers(wall_time);
       };
       function initializeClocks() {
         var wall_time_start = new Date();
-        var page_time_start = new Date(markers[0].time);
+        var page_time_start = new Date(markers_queue[0].time);
         time_offset = page_time_start.getTime() - wall_time_start.getTime();
         setInterval(function(){updateClocks()}, 500);
       };
