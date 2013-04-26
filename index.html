@@ -11,27 +11,51 @@
 
     <title>Emoticommits</title>
     <script type="text/javascript">
+      var page_time;
+
       var avatar_duration = 600*1000; // 10 min
       var avatar_size = 32;
       var emoticon_duration = 1800*1000;  // 30 min
       var emoticon_size = 48;
 
+      function markersBasename(time) {
+        var basename = time.getUTCFullYear();
+        var m = time.getUTCMonth() + 1;
+        if (m < 10) {
+          basename += "0";
+        }
+        basename += m;
+        basename += time.getUTCDate();
+        var h = time.getUTCHours();
+        if (h < 10) {
+          basename += "0";
+        }
+        basename += h;
+        return basename
+      }
+
       var markers_queue = new Array;
-      var avatars_on_map = new Array;
-      var emoticons_on_map = new Array;
+      var loaded_markers_basename;
       function loadMarkers(basename) {
-        var http = new XMLHttpRequest();
-        http.open('GET', "markers/" + basename + ".json");
-        http.send(null);
-        http.onreadystatechange = function() {
-          if ((http.readyState == 4) && (http.status == 200)) {
-            JSON.parse(http.responseText).forEach(function(marker) {
-              markers_queue.push(marker);
-            });
-            initializeClocks();
+        if (basename != loaded_markers_basename) {
+          var http = new XMLHttpRequest();
+          http.open('GET', "markers/" + basename + ".json");
+          http.send(null);
+          loaded_markers_basename = basename;
+          http.onreadystatechange = function() {
+            if ((http.readyState == 4) && (http.status == 200)) {
+              JSON.parse(http.responseText).forEach(function(marker) {
+                if (page_time < new Date(marker.time)) {
+                  markers_queue.push(marker);
+                }
+              });
+            };
           };
         };
       };
+
+      var avatars_on_map = new Array;
+      var emoticons_on_map = new Array;
       function addMarkers(page_time, wall_time) {
         while(markers_queue.length > 0 && new Date(markers_queue[0].time) < page_time) {
           var marker = markers_queue.shift();
@@ -63,26 +87,26 @@
         }
       }
 
-      var time_offset;
+      var time_offset = -24*3600*1000; // 1 day, for now
+      var fetch_offset = 10*60*1000  // 10 minutes
       function updateClocks() {
         var wall_time = new Date();
-        var page_time = new Date(wall_time.getTime() + time_offset);
+        page_time = new Date(wall_time.getTime() + time_offset);
         document.getElementById("wall_clock").innerHTML = wall_time.toLocaleString();
         document.getElementById("page_clock").innerHTML = page_time.toLocaleString();
         addMarkers(page_time, wall_time);
         removeMarkers(wall_time);
       };
-      function initializeClocks() {
-        var wall_time_start = new Date();
-        var page_time_start = new Date(markers_queue[0].time);
-        time_offset = page_time_start.getTime() - wall_time_start.getTime();
-        setInterval(function(){updateClocks()}, 500);
-      };
 
       var mapwindow;
       function initialize() {
         mapwindow = document.getElementById("mapframe").contentWindow;
-        loadMarkers("2013042322");
+        setInterval(function(){
+          updateClocks();
+          loadMarkers(markersBasename(new Date(page_time.getTime() + fetch_offset)));
+        }, 500);
+        updateClocks();
+        loadMarkers(markersBasename(page_time));
       };
       window.onload = initialize;
     </script>
