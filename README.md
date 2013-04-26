@@ -3,7 +3,7 @@ emoticommits
 
 Commits and comments with emotions are good for your health :smile:
 
-Have a look at http://zunda.github.io/emoticommits/
+Have a look at http://zunda.github.io/emoticommits/ The maps shows commits and comments of GitHub users, along with their avatars, or, better than those, emoticons :smiley:
 
 Extracting commits and comments with locations
 ----------------------------------------------
@@ -11,6 +11,6 @@ A server runs [record_activity.rb](bin/record_activity.rb) as an [hourly cron jo
 
 Creating JSON files for markers on the map
 ------------------------------------------
-To be implmented
+The [map](http://zunda.github.io/emoticommits/) loads a JSON file of markers, which show commits or comments along with users' location, every hour on 50 minutes.
 
-The [map](http://zunda.github.io/emoticommits/) loads a JSON file of markers, which show commits or comments along with users' location, once an hour. As the map shows evetns of either 24 hours ago or 7 days ago, JSON files of markers for 25 hours ago and 7 days and 1 hour ago are created from the local databases everyhour and automatically committed.
+As the map shows evetns of either 24 hours ago or 7 days ago, JSON files of markers for 23 hours ago and 7 days minus 1 hour ago are created from the local databases everyhour and automatically committed at the server side.
