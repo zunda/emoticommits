@@ -94,7 +94,7 @@ $log = Syslog::Logger.new("#{File.basename($0, '.rb')}-#{json_id}")
 at_exit{print_message($log, "exiting after processing #{processed_events} events and #{processed_addresses} addresses")}
 
 # Read githubarchive JSON
-max_retry = 2
+max_retry = 4
 current_retry = 0
 js = nil
 begin
@@ -105,8 +105,8 @@ rescue OpenURI::HTTPError => e
 	if current_retry < max_retry
 		case e.message[0..2]
 		when '404'
-			print_error($log, e, "retrying in about 600 seconds (#{current_retry})")
-			random_wait(600)
+			print_error($log, e, "retrying in about 300 seconds (#{current_retry})")
+			random_wait(300)
 			print_message($log, "resuming ...")
 			retry
 		end
@@ -115,8 +115,8 @@ rescue OpenURI::HTTPError => e
 rescue SocketError, Errno::ENETUNREACH => e	# Temporary failure in name resolution
 	current_retry += 1
 	if current_retry < max_retry
-		print_error($log, w, "retrying in about 600 seconds (#{current_retry})")
-		random_wait(600)
+		print_error($log, w, "retrying in about 300 seconds (#{current_retry})")
+		random_wait(300)
 		print_message($log, "resuming ...")
 		retry
 	end
@@ -170,8 +170,8 @@ begin
 		rescue GitHubArchive::EventParseToWaitError => e
 			current_retry += 1
 			if current_retry < max_retry
-				print_error($log, e, "retrying in about 600 sec (#{current_retry})")
-				random_wait(600)
+				print_error($log, e, "retrying in about 300 sec (#{current_retry})")
+				random_wait(300)
 				$log.info("resuming ...")
 				retry
 			else
