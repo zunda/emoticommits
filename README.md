@@ -13,4 +13,4 @@ Creating JSON files for markers
 -------------------------------
 To be implmented
 
-The [map](http://zunda.github.io/emoticommits/) loads a JSON file of markers, which show commits or comments along with users' location, once an hour. As the map shows evetns of either 24 hours ago or 7 days ago, [JSON files](http://zunda.github.io/emoticommits/markers/) of markers for 25 hours ago and 7 days and 1 hour ago are created from the local databases everyhour and automatically committed.
+The [map](http://zunda.github.io/emoticommits/) loads a JSON file of markers, which show commits or comments along with users' location, once an hour. As the map shows evetns of either 24 hours ago or 7 days ago, JSON files of markers for 25 hours ago and 7 days and 1 hour ago are created from the local databases everyhour and automatically committed.
