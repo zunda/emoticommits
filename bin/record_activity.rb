@@ -50,13 +50,19 @@ def githubarchive_url(time)
 	return r
 end
 
-def print_error(error, message)
-	$log.info("#{error.message.chomp} - #{message}")
+def print_error(log, error, message)
+	print_message(log, "#{error.message.chomp} - #{message}")
+end
+
+def print_message(log, message)
+	log.info(message)
 end
 
 def random_wait(seconds)
-	sleep(seconds*random + seconds/2)
+	sleep((rand + 0.5) * seconds)
 end
+
+class GiveUp < StandardError; end
 
 class Configuration < ConfigurationBase
 	attr_reader :github_auth
@@ -70,6 +76,7 @@ end
 eventdbpath = ARGV.shift
 locationdbpath = ARGV.shift
 offsetmins = Integer(ARGV.shift)
+github_api_timeout = 50 * 60	# seconds before quiting queries to GitHub API
 
 # Databases
 eventdb = SQLite3Database.open(eventdbpath)
@@ -79,83 +86,110 @@ locationdb = SQLite3Database.open(locationdbpath)
 locationdb.create_table('locations', GoogleApi::Geocoding.schema)
 processed_addresses = 0
 
-# Read githubarchive JSON
 json_url = githubarchive_url(Time.now - offsetmins * 60)
 json_id = File.basename(json_url, '.json.gz')
-$log = Syslog::Logger.new("#{File.basename($0, '.rb')}-#{json_id}")
-$log.info("Starting to parse #{json_url}")
-at_exit{$log.info("exiting after processing #{processed_events} events and #{processed_addresses} addresses")}
 
-max_retry = 3
+# Prepare log
+$log = Syslog::Logger.new("#{File.basename($0, '.rb')}-#{json_id}")
+at_exit{print_message($log, "exiting after processing #{processed_events} events and #{processed_addresses} addresses")}
+
+# Read githubarchive JSON
+max_retry = 4
 current_retry = 0
+js = nil
 begin
+	print_message($log, "Loading #{json_url}")
 	js = Zlib::GzipReader.new(open(json_url)).read
 rescue OpenURI::HTTPError => e
-	print_error(e, json_url)
+	current_retry += 1
 	if current_retry < max_retry
 		case e.message[0..2]
 		when '404'
-			current_retry += 1
-			$log.info("  retrying in about 600 seconds (#{current_retry})")
-			random_sleep(600)
-			$log.info("resuming ...")
+			print_error($log, e, "retrying in about 300 seconds (#{current_retry})")
+			random_wait(300)
+			print_message($log, "resuming ...")
 			retry
 		end
 	end
-	exit 1
+	print_error($log, e, "Giving up")	# leave js nil
 rescue SocketError, Errno::ENETUNREACH => e	# Temporary failure in name resolution
-	print_error(e, json_url)
+	current_retry += 1
 	if current_retry < max_retry
-		current_retry += 1
-		$log.info("  retrying in about 600 seconds (#{current_retry})")
-		random_sleep(600)
-		$log.info("resuming ...")
+		print_error($log, w, "retrying in about 300 seconds (#{current_retry})")
+		random_wait(300)
+		print_message($log, "resuming ...")
 		retry
 	end
-	exit 1
+	print_error($log, e, "Giving up")	# leave js nil
 end
 
 # Parse githubarchive JSON
+total_query = 0
+i_query = 0
 locations = Array.new
-Yajl::Parser.parse(js) do |ev|
-	current_retry = 0
-	begin
-		GitHubArchive::EventParser.parse(ev, dry_run: false, auth: conf.github_auth) do |event|
+begin
+	raise GiveUp unless js
+
+	parser = GitHubArchive::EventParser.new(auth: conf.github_auth)
+
+	# First parse information within JSON from GitHub Archive
+	print_message($log, "Parsing #{json_url}")
+	Yajl::Parser.parse(js) do |entry|
+		parser.parse(entry) do |event|
 			eventdb.insert('events', event)
 			locations << event.location
-		end
-	rescue GitHubArchive::EventParseIgnorableError => e
-		#print_error(e, "moving onto next entry")
-	rescue GitHubArchive::EventParseRetryableError => e
-		if current_retry < max_retry
-			current_retry += 1
-			print_error(e, "retrying after about 1 sec (#{current_retry})")
-			random_sleep(1)
-			retry
-		else
-			print_error(e, "moving onto next entry")
-		end
-	rescue GitHubArchive::EventParseToWaitError => e
-		print_error(e, "retrying in about 600 sec (#{current_retry})")
-		current_retry += 1
-		if current_retry < max_retry
-			$log.info("  retrying in about 600 sec (#{current_retry})")
-			random_sleep(600)
-			$log.info("resuming ...")
-			retry
-		else
-			$log.info("  retrying in about 1800 sec (#{current_retry})")
-			random_sleep(1800)
-			$log.info("resuming ...")
-			retry
+			processed_events += 1
 		end
 	end
-	processed_events += 1
+
+	# Then try querying GitHub API for additional information
+	print_message($log, "Querying GitHub API")
+	total_query = parser.api_queries.size
+	i_query = 0
+	time_limit = Time.now + github_api_timeout
+	parser.api_queries.shuffle.each do |query|
+		current_retry = 0
+		begin
+			GitHubArchive::EventParser.query_api(query) do |event|
+				eventdb.insert('events', event)
+				locations << event.location
+				i_query += 1
+				processed_events += 1
+			end
+		rescue GitHubArchive::EventParseIgnorableError => e
+			#print_error($log, e, "moving onto next entry")
+		rescue GitHubArchive::EventParseRetryableError => e
+			current_retry += 1
+			if current_retry < max_retry
+				print_error($log, e, "retrying after about 1 sec (#{current_retry})")
+				random_wait(1)
+				retry
+			else
+				print_error($log, e, "moving onto next entry")
+			end
+		rescue GitHubArchive::EventParseToWaitError => e
+			current_retry += 1
+			if current_retry < max_retry
+				print_error($log, e, "retrying in about 300 sec (#{current_retry})")
+				random_wait(300)
+				$log.info("resuming ...")
+				retry
+			else
+				print_error($log, e, "Giving up (#{current_retry})")
+				raise GiveUp
+			end
+		end
+		if time_limit < Time.now
+			print_message($log, "Time out for querying GitHub API. #{"%.0f" % (100.0 * i_query / total_query)}% complete")
+			raise GiveUp
+		end
+	end
+rescue GiveUp
 end
 eventdb.close
 
 # Query some locations
-$log.info("querying locations")
+print_message($log, "Querying locations")
 
 maxquery = 100
 queries = 0
@@ -170,4 +204,4 @@ locations.shuffle.each do |address|
 end
 locationdb.close
 
-$log.info("finished")
+print_message($log, "Finished")

@@ -55,128 +55,130 @@ module GitHubArchive
 
 	# based upon http://developer.github.com/v3/activity/events/types/
 	class EventParser
+		attr_reader :api_queries
+
+		def initialize(opts = {auth: nil})
+			@auth = opts[:auth]
+			@api_queries = Array.new
+		end
+
 		# yeilds Event
 		# auth: [user, password]
-		def EventParser.parse(js, opts = {dry_run: false, auth: nil})
-			begin
-				dry_run = opts[:dry_run]
-				auth = opts[:auth]
+		def parse(js)
+			actor = js['actor_attributes']
+			return unless actor
 
-				actor = js['actor_attributes']
-				return unless actor
+			loc = actor['location']
+			return unless loc
+			avatar = actor['gravatar_id']
+			return unless avatar
 
-				loc = actor['location']
-				return unless loc
-				avatar = actor['gravatar_id']
-				return unless avatar
-
-				type = js['type']
-				c = nil
-				case type
-				when 'CommitCommentEvent'
-					unless dry_run
-						c = GitHubApi::SingleCommitComment.new(js['repository']['owner'], js['repository']['name'], js['payload']['comment_id'], auth: auth)
-						c.read_and_parse
-						comment = c.js['body']
-						timestamp = c.timestamp
-						url = c.js['html_url']
-					end
-					yield Event.new(timestamp || Time.parse(js['created_at']), comment, loc, url, type, avatar)
-					return
-				when 'CreateEvent'
-					comment = js['payload']['description']
-					timestamp = Time.parse(js['created_at'])
-					url = js['url']
-					yield Event.new(timestamp, comment, loc, url, type, avatar)
-					return
-				when 'DeleteEvent'
-					return	# nothing interesting
-				when 'DownloadEvent'
-					unless dry_run
-						c = GitHubApi::Download.new(js['repository']['owner'], js['repository']['name'], js['payload']['id'], auth: auth)
-						c.read_and_parse
-						comment = c.js['description']
-						timestamp = c.timestamp
-						url = c.js['html_url']
-					end
-					yield Event.new(timestamp, comment, loc, url, type, avatar)
-					return
-				when 'FollowEvent'
-					return	# emotions, if there are, are not from the event
-				when 'ForkEvent'
-					return	# emotions, if there are, are not from the event
-				when 'ForkApplyEvent'
-					return	# no example found for now. I will come back later
-				when 'GistEvent'
-					unless dry_run
-						c = GitHubApi::Gist.new(js['payload']['id'], auth: auth)
-						c.read_and_parse
-						comment = c.js['description']
-						timestamp = c.timestamp
-						url = c.js['html_url']
-					end
-					yield Event.new(timestamp || Time.parse(js['created_at']), comment, loc, url, type, avatar)
-					return
-				when 'GollumEvent'
-					return	# ignore for now
-				when 'IssueCommentEvent'
-					return	# could not find endpoint URL
-				when 'IssuesEvent'
-					return	# emotions, if there are, are not from the event
-				when 'MemberEvent'
-					return	# emotions, if there are, are not from the event
-				when 'PublicEvent'
-					return	# emotions, if there are, are not from the event
-				when 'PullRequestEvent'
-					unless dry_run
-						c = GitHubApi::SinglePullRequest.new(js['repository']['owner'], js['repository']['name'], js['payload']['number'], auth: auth)
-						c.read_and_parse
-						comment = c.js['body']
-						timestamp = c.timestamp
-						url = c.js['html_url']
-					end
-					yield Event.new(timestamp || Time.parse(js['created_at']), comment, loc, url, type, avatar)
-					return
-				when 'PullRequestReviewCommentEvent'
-					comment = js['payload']['comment']['body']
-					timestamp = Time.parse(js['created_at'])
-					url = js['payload']['comment']['html_url']
-					yield Event.new(timestamp, comment, loc, url, type, avatar)
-					return
-				when 'PushEvent'
-					unless dry_run
-						js['payload']['shas'].each do |sha, email, message, name, distinct|
-							c = GitHubApi::Commit.new(js['repository']['owner'], js['repository']['name'], sha, auth: auth)
-							c.read_and_parse
-							comment = c.js['commit']['message']
-							timestamp = c.timestamp
-							url = c.js['html_url']
-							yield Event.new(timestamp, comment, loc, url, type, avatar)
-						end
-					else
-						yield Event.new(Time.parse(js['created_at']), nil, loc, nil, type, avatar)
-					end
-					return
-				when 'TeamAddEvent'
-					return	# emotions, if there are, are not from the event
-				when 'WatchEvent'
-					return	# emotions, if there are, are not from the event
+			type = js['type']
+			c = nil
+			case type
+			when 'CommitCommentEvent'
+				c = GitHubApi::SingleCommitComment.new(js['repository']['owner'], js['repository']['name'], js['payload']['comment_id'], auth: @auth)
+				c.location = loc
+				c.type = type
+				c.avatar = avatar
+				@api_queries << c
+				return
+			when 'CreateEvent'
+				comment = js['payload']['description']
+				timestamp = Time.parse(js['created_at'])
+				url = js['url']
+				yield Event.new(timestamp, comment, loc, url, type, avatar)
+				return
+			when 'DeleteEvent'
+				return	# nothing interesting
+			when 'DownloadEvent'
+				c = GitHubApi::Download.new(js['repository']['owner'], js['repository']['name'], js['payload']['id'], auth: @auth)
+				c.location = loc
+				c.type = type
+				c.avatar = avatar
+				@api_queries << c
+				return
+			when 'FollowEvent'
+				return	# emotions, if there are, are not from the event
+			when 'ForkEvent'
+				return	# emotions, if there are, are not from the event
+			when 'ForkApplyEvent'
+				return	# no example found for now. I will come back later
+			when 'GistEvent'
+				c = GitHubApi::Gist.new(js['payload']['id'], auth: @auth)
+				c.timestamp = Time.parse(js['created_at'])	# Some Gitsts don't have created_at property
+				c.location = loc
+				c.type = type
+				c.avatar = avatar
+				@api_queries << c
+				return
+			when 'GollumEvent'
+				return	# ignore for now
+			when 'IssueCommentEvent'
+				return	# could not find endpoint URL
+			when 'IssuesEvent'
+				return	# emotions, if there are, are not from the event
+			when 'MemberEvent'
+				return	# emotions, if there are, are not from the event
+			when 'PublicEvent'
+				return	# emotions, if there are, are not from the event
+			when 'PullRequestEvent'
+				c = GitHubApi::SinglePullRequest.new(js['repository']['owner'], js['repository']['name'], js['payload']['number'], auth: @auth)
+				c.timestamp = Time.parse(js['created_at'])	# Some PullRequests don't have created_at property
+				c.location = loc
+				c.type = type
+				c.avatar = avatar
+				@api_queries << c
+				return
+			when 'PullRequestReviewCommentEvent'
+				comment = js['payload']['comment']['body']
+				timestamp = Time.parse(js['created_at'])
+				url = js['payload']['comment']['html_url']
+				yield Event.new(timestamp, comment, loc, url, type, avatar)
+				return
+			when 'PushEvent'
+				return unless js['repository']
+				js['payload']['shas'].each do |sha, email, message, name, distinct|
+					c = GitHubApi::Commit.new(js['repository']['owner'], js['repository']['name'], sha, auth: @auth)
+					c.location = loc
+					c.type = type
+					c.avatar = avatar
+					@api_queries << c
 				end
+				return
+			when 'TeamAddEvent'
+				return	# emotions, if there are, are not from the event
+			when 'WatchEvent'
+				return	# emotions, if there are, are not from the event
+			end
+		end
+
+		def EventParser.parse(js, opts = {dry_run: false, auth: nil}, &block)
+			EventParser.new(js, opts = {dry_run: false, auth: nil}).parse(&block)
+		end
+
+		def EventParser.query_api(api_query)
+			begin
+				api_query.read_and_parse
+				yield Event.new(api_query.timestamp, api_query.comment, api_query.location, api_query.html_url, api_query.type, api_query.avatar)
 			rescue OpenURI::HTTPError => e
+				message = "#{e.message} (#{e.class}) for #{api_query.json_url} from #{api_query.type}"
 				case e.message[0..2]
 				when '404'	# Not Found
-					raise EventParseIgnorableError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
+					raise EventParseIgnorableError.new(message)
 				when '500', '502'	# Internal Server Error, Bad Gateway
-					raise EventParseRetryableError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
+					raise EventParseRetryableError.new(message)
 				when '403', '401', '409'	# we might have hit rate limit
-					raise EventParseToWaitError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
+					raise EventParseToWaitError.new(message)
 				else
 					raise e
 				end
-			rescue Net::HTTPBadResponse => e
-				raise EventParseRetryableError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
+			rescue Net::HTTPBadResponse, Errno::ETIMEDOUT => e
+				message = "#{e.message} (#{e.class}) for #{api_query.json_url} from #{api_query.type}"
+				raise EventParseRetryableError.new(message)
 			rescue SocketError, Errno::ENETUNREACH => e
-				raise EventParseToWaitError.new("#{e.message} (#{e.class}) for #{c.url} from #{type} created_at #{js['created_at']}")
+				message = "#{e.message} (#{e.class}) for #{api_query.json_url} from #{api_query.type}"
+				raise EventParseToWaitError.new(message)
 			end
 		end
 	end
