@@ -42,7 +42,7 @@ t0 = Time.now
 $log = Syslog::Logger.new("#{File.basename($0, '.rb')}-#{t0.strftime("%H%M%S")}")
 
 [-7, -1].each do |day_offset|
-	t1 = Time.at((t0 + day_offset*24*3600 - hour_offset*3600).to_i/3600*3600)
+	t1 = Time.at((t0 + day_offset*24*3600 + hour_offset*3600).to_i/3600*3600)
 	t2 = t1 +  3600
 	$log.info("Listing markers for #{t1} - #{t2}")
 
