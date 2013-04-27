@@ -12,6 +12,7 @@
     </script>
     <script type="text/javascript">
       var map;
+      var markerZ = 0;
       function initialize() {
         var mapOptions = {
           center: new google.maps.LatLng(0, 0),
@@ -22,7 +23,7 @@
           mapOptions);
       };
       function dropPin(lat, lng, icon, size, linkurl) {
-        marker = new google.maps.Marker({
+        var marker = new google.maps.Marker({
           map: map,
           draggable: false,
           animation: google.maps.Animation.DROP,
@@ -31,8 +32,10 @@
             url: icon,
             scaledSize: new google.maps.Size(size, size),
             anchor: new google.maps.Point(size/2, size/2),
-          }
+          },
+          zIndex: markerZ
         })
+        markerZ += 1;
 				google.maps.event.addListener(marker, 'click', function(){
 					window.open(linkurl);
 				});
