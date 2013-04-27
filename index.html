@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="chrome=1" />
     <meta name="description" content="Emoticommits : Commits and comments with emotions are good for your health :smile:" />
 
+    <script type="text/javascript" src="javascripts/markers.js"></script>
     <script type="text/javascript">
       var page_time;
 
@@ -14,74 +15,13 @@
       var emoticon_duration = 1800*1000;  // 30 min
       var emoticon_size = 48;
 
-      function markersBasename(time) {
-        var basename = time.getUTCFullYear();
-        var m = time.getUTCMonth() + 1;
-        if (m < 10) {
-          basename += "0";
-        }
-        basename += m;
-        basename += time.getUTCDate();
-        var h = time.getUTCHours();
-        if (h < 10) {
-          basename += "0";
-        }
-        basename += h;
-        return basename
-      }
-
       var markers_queue = new Array;
-      var loaded_markers_basename;
-      function loadMarkers(basename) {
-        if (basename != loaded_markers_basename) {
-          var http = new XMLHttpRequest();
-          http.open('GET', "markers/" + basename + ".json");
-          http.send(null);
-          loaded_markers_basename = basename;
-          http.onreadystatechange = function() {
-            if ((http.readyState == 4) && (http.status == 200)) {
-              JSON.parse(http.responseText).forEach(function(marker) {
-                if (page_time < new Date(marker.time)) {
-                  markers_queue.push(marker);
-                }
-              });
-            };
-          };
-        };
-      };
+      var loaded_basename;
 
-      var avatars_on_map = new Array;
-      var emoticons_on_map = new Array;
-      function addMarkers(page_time, wall_time) {
-        while(markers_queue.length > 0 && new Date(markers_queue[0].time) < page_time) {
-          var marker = markers_queue.shift();
-          var icon = marker.icon;
-          var size;
-          var until;
-          if (marker.emotion) {
-            size = emoticon_size;
-            until = new Date(wall_time.getTime() + emoticon_duration);
-          } else {
-            size = avatar_size;
-            icon += "?s=" + size;
-            until = new Date(wall_time.getTime() + avatar_duration);
-          };
-          var pin = mapwindow.dropPin(marker.lat, marker.lng, icon, size, marker.url);
-          if (marker.emotion) {
-            emoticons_on_map.push({until: until, marker: pin});
-          } else {
-            avatars_on_map.push({until: until, marker: pin});
-          }
-        };
+      var on_map = {
+        avatars: new Array,
+        emoticons: new Array,
       };
-      function removeMarkers(wall_time) {
-        while(avatars_on_map.length > 0 && avatars_on_map[0].until < wall_time) {
-          mapwindow.removePin(avatars_on_map.shift().marker);
-        }
-        while(emoticons_on_map.length > 0 && emoticons_on_map[0].until < wall_time) {
-          mapwindow.removePin(emoticons_on_map.shift().marker);
-        }
-      }
 
       var time_offset = -24*3600*1000; // 1 day, for now
       var fetch_offset = 15*60*1000*(0.5+Math.random());  // 7.5-22.5 minutes
@@ -90,8 +30,8 @@
         page_time = new Date(wall_time.getTime() + time_offset);
         document.getElementById("wall_clock").innerHTML = wall_time.toLocaleString();
         document.getElementById("page_clock").innerHTML = page_time.toLocaleString();
-        addMarkers(page_time, wall_time);
-        removeMarkers(wall_time);
+        addMarkers(page_time, wall_time, markers_queue, on_map);
+        removeMarkers(wall_time, on_map);
       };
 
       var mapwindow;
@@ -99,10 +39,17 @@
         mapwindow = document.getElementById("mapframe").contentWindow;
         setInterval(function(){
           updateClocks();
-          loadMarkers(markersBasename(new Date(page_time.getTime() + fetch_offset)));
+          basename = 
+            markersBasename(new Date(page_time.getTime() + fetch_offset));
+          if (basename != loaded_basename) {
+            loadMarkers(basename, markers_queue);
+            loaded_basename = basename;
+          }
         }, 500);
         updateClocks();
-        loadMarkers(markersBasename(page_time));
+        loaded_basename =
+          markersBasename(new Date(page_time.getTime()));
+        loadMarkers(loaded_basename, markers_queue);
       };
       window.onload = initialize;
     </script>
