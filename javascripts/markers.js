@@ -14,7 +14,7 @@ function markersBasename(time) {
   return basename
 }
 
-function loadMarkers(basename, markers_queue) {
+function loadMarkers(basename, markers) {
   var http = new XMLHttpRequest();
   http.open('GET', "markers/" + basename + ".json");
   http.send(null);
@@ -23,19 +23,19 @@ function loadMarkers(basename, markers_queue) {
     if ((http.readyState == 4) && (http.status == 200)) {
       JSON.parse(http.responseText).forEach(function(marker) {
         if (page_time < new Date(marker.time)) {
-          markers_queue.push(marker);
+          markers.queue.push(marker);
         }
       });
     };
   };
 };
 
-function addMarkers(page_time, wall_time, markers_queue, on_map, conf) {
+function addMarkers(page_time, wall_time, markers, conf) {
   while(
-    markers_queue.length > 0 &&
-    new Date(markers_queue[0].time) < page_time
+    markers.queue.length > 0 &&
+    new Date(markers.queue[0].time) < page_time
   ) {
-    var marker = markers_queue.shift();
+    var marker = markers.queue.shift();
     var icon = marker.icon;
     var size;
     var until;
@@ -49,17 +49,17 @@ function addMarkers(page_time, wall_time, markers_queue, on_map, conf) {
     };
     var pin = mapwindow.dropPin(marker.lat, marker.lng, icon, size, marker.url);
     if (marker.emotion) {
-      on_map.emoticons.push({until: until, marker: pin});
+      markers.emoticons.push({until: until, marker: pin});
     } else {
-      on_map.avatars.push({until: until, marker: pin});
+      markers.avatars.push({until: until, marker: pin});
     }
   };
 };
-function removeMarkers(wall_time, on_map) {
-  while(on_map.avatars.length > 0 && on_map.avatars[0].until < wall_time) {
-    mapwindow.removePin(on_map.avatars.shift().marker);
+function removeMarkers(wall_time, markers) {
+  while(markers.avatars.length > 0 && markers.avatars[0].until < wall_time) {
+    mapwindow.removePin(markers.avatars.shift().marker);
   }
-  while(on_map.emoticons.length > 0 && on_map.emoticons[0].until < wall_time) {
-    mapwindow.removePin(on_map.emoticons.shift().marker);
+  while(markers.emoticons.length > 0 && markers.emoticons[0].until < wall_time) {
+    mapwindow.removePin(markers.emoticons.shift().marker);
   }
 }

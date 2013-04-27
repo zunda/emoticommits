@@ -24,7 +24,8 @@
       var markers_queue = new Array;
       var loaded_basename;
 
-      var on_map = {
+      var markers = {
+        queue: new Array,
         avatars: new Array,
         emoticons: new Array,
       };
@@ -36,8 +37,8 @@
         page_time = new Date(wall_time.getTime() + time_offset);
         document.getElementById("wall_clock").innerHTML = wall_time.toLocaleString();
         document.getElementById("page_clock").innerHTML = page_time.toLocaleString();
-        addMarkers(page_time, wall_time, markers_queue, on_map, marker_conf);
-        removeMarkers(wall_time, on_map);
+        addMarkers(page_time, wall_time, markers, marker_conf);
+        removeMarkers(wall_time, markers);
       };
 
       var mapwindow;
@@ -48,14 +49,14 @@
           basename = 
             markersBasename(new Date(page_time.getTime() + fetch_offset));
           if (basename != loaded_basename) {
-            loadMarkers(basename, markers_queue);
+            loadMarkers(basename, markers);
             loaded_basename = basename;
           }
         }, 1000);
         updateClocks();
         loaded_basename =
           markersBasename(new Date(page_time.getTime()));
-        loadMarkers(loaded_basename, markers_queue);
+        loadMarkers(loaded_basename, markers);
       };
       window.onload = initialize;
     </script>
