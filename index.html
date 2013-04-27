@@ -10,10 +10,16 @@
     <script type="text/javascript">
       var page_time;
 
-      var avatar_duration = 600*1000; // 10 min
-      var avatar_size = 32;
-      var emoticon_duration = 1800*1000;  // 30 min
-      var emoticon_size = 48;
+      var marker_conf = {
+        avatar: {
+          duration: 600*1000, // 10 min
+          size: 32
+        },
+        emoticon: {
+          duration: 1800*1000, // 30 min
+          size: 48
+        }
+      };
 
       var markers_queue = new Array;
       var loaded_basename;
@@ -30,7 +36,7 @@
         page_time = new Date(wall_time.getTime() + time_offset);
         document.getElementById("wall_clock").innerHTML = wall_time.toLocaleString();
         document.getElementById("page_clock").innerHTML = page_time.toLocaleString();
-        addMarkers(page_time, wall_time, markers_queue, on_map);
+        addMarkers(page_time, wall_time, markers_queue, on_map, marker_conf);
         removeMarkers(wall_time, on_map);
       };
 
@@ -45,7 +51,7 @@
             loadMarkers(basename, markers_queue);
             loaded_basename = basename;
           }
-        }, 500);
+        }, 1000);
         updateClocks();
         loaded_basename =
           markersBasename(new Date(page_time.getTime()));

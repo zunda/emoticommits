@@ -30,7 +30,7 @@ function loadMarkers(basename, markers_queue) {
   };
 };
 
-function addMarkers(page_time, wall_time, markers_queue, on_map) {
+function addMarkers(page_time, wall_time, markers_queue, on_map, conf) {
   while(
     markers_queue.length > 0 &&
     new Date(markers_queue[0].time) < page_time
@@ -40,12 +40,12 @@ function addMarkers(page_time, wall_time, markers_queue, on_map) {
     var size;
     var until;
     if (marker.emotion) {
-      size = emoticon_size;
-      until = new Date(wall_time.getTime() + emoticon_duration);
+      size = conf.emoticon.size;
+      until = new Date(wall_time.getTime() + conf.emoticon.duration);
     } else {
-      size = avatar_size;
-      icon += "?s=" + size;
-      until = new Date(wall_time.getTime() + avatar_duration);
+      size = conf.avatar.size;
+      icon += "?s=" + conf.avatar.size;
+      until = new Date(wall_time.getTime() + conf.avatar.duration);
     };
     var pin = mapwindow.dropPin(marker.lat, marker.lng, icon, size, marker.url);
     if (marker.emotion) {
