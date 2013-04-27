@@ -30,7 +30,7 @@ function loadMarkers(basename, markers) {
   };
 };
 
-function addMarkers(page_time, wall_time, markers, conf) {
+function addMarkers(page_time, wall_time, markers, conf, mapwindow) {
   while(
     markers.queue.length > 0 &&
     new Date(markers.queue[0].time) < page_time
@@ -55,7 +55,7 @@ function addMarkers(page_time, wall_time, markers, conf) {
     }
   };
 };
-function removeMarkers(wall_time, markers) {
+function removeMarkers(wall_time, markers, mapwindow) {
   while(markers.avatars.length > 0 && markers.avatars[0].until < wall_time) {
     mapwindow.removePin(markers.avatars.shift().marker);
   }

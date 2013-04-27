@@ -9,6 +9,7 @@
     <script type="text/javascript" src="javascripts/markers.js"></script>
     <script type="text/javascript">
       var page_time;
+      var mapwindow;
 
       var marker_conf = {
         avatar: {
@@ -37,11 +38,10 @@
         page_time = new Date(wall_time.getTime() + time_offset);
         document.getElementById("wall_clock").innerHTML = wall_time.toLocaleString();
         document.getElementById("page_clock").innerHTML = page_time.toLocaleString();
-        addMarkers(page_time, wall_time, markers, marker_conf);
-        removeMarkers(wall_time, markers);
+        addMarkers(page_time, wall_time, markers, marker_conf, mapwindow);
+        removeMarkers(wall_time, markers, mapwindow);
       };
 
-      var mapwindow;
       function initialize() {
         mapwindow = document.getElementById("mapframe").contentWindow;
         setInterval(function(){
