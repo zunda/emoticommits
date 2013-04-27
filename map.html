@@ -37,7 +37,7 @@
         return marker;
       };
       function removePin(marker) {
-        if (marker != null) marker.setMap(null);
+        marker.setMap(null);
         delete marker;
       }
       google.maps.event.addDomListener(window, 'load', initialize);

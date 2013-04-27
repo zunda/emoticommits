@@ -76,10 +76,10 @@
       };
       function removeMarkers(wall_time) {
         while(avatars_on_map.length > 0 && avatars_on_map[0].until < wall_time) {
-          avatars_on_map.shift().marker.setMap(null);
+          mapwindow.removePin(avatars_on_map.shift().marker);
         }
         while(emoticons_on_map.length > 0 && emoticons_on_map[0].until < wall_time) {
-          emoticons_on_map.shift().marker.setMap(null);
+          mapwindow.removePin(emoticons_on_map.shift().marker);
         }
       }
 
