@@ -84,7 +84,7 @@
       }
 
       var time_offset = -24*3600*1000; // 1 day, for now
-      var fetch_offset = 10*60*1000  // 10 minutes
+      var fetch_offset = 15*60*1000*(0.5+Math.random());  // 7.5-22.5 minutes
       function updateClocks() {
         var wall_time = new Date();
         page_time = new Date(wall_time.getTime() + time_offset);
