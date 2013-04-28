@@ -9,9 +9,9 @@ Sun.t = function(et) {
 	return (et.getTime() - Sun.et0_msec)/(365.25*24*3600*1000);	// p.207
 };
 
-// Ecliptic longitude for Time Parameter
+// Sun's ecliptic longitude for Time Parameter
 Sun.lambda_for_t = function(t) {	// p.206
-	r = 279.0358 + 360.00769*t
+	var r = 279.0358 + 360.00769*t
 		+ (1.9159 - 0.00005*t) * Sun.sin_deg(356.531 + 359.991*t)
 		+ 0.0200 * Sun.sin_deg(353.06 + 719.981*t)
 		- 0.0048 * Sun.sin_deg(248.64 -  19.341*t)
@@ -36,4 +36,20 @@ Sun.lambda_for_t = function(t) {	// p.206
 		+ 0.0003 * Sun.sin_deg(241.2  -  44.43*t)
 		;
 	return r % 360;
+};
+
+// Difference between Epehmeris Time and UT: ET = UT + DT
+Sun.dT = function(time) {
+	var y = time.getTime()/(365.25*24*3600*1000) + 1970;
+	return 0.895895*(y - 1960.5) + 30.7727;	// see scratch/dt.dat
+};
+
+// Epehmeris Time for UT
+Sun.eT = function(time) {
+	return new Date(time.getTime() + Sun.dT(time));
+};
+
+// Sun's ecliptic longitude for Time
+Sun.lambda = function(time) {
+	return Sun.lambda_for_t(Sun.eT(time));
 };
