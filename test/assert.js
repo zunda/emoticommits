@@ -26,7 +26,7 @@ var assert_equal = function(target, str) {
 var assert_in_delta = function(target, delta, str) {
 	result = eval(str);
 	if (Math.abs(result - target) <= delta) {
-		Assert.showOk(str + " is within " + delta + " from " + target);
+		Assert.showOk(str + " is " + result + " and within " + delta + " from " + target);
 	} else {
 		Assert.showNg(str + " is " + result + " and not within " + delta + " from " + target);
 	};

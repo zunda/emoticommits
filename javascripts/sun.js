@@ -49,7 +49,15 @@ Sun.eT = function(time) {
 	return new Date(time.getTime() + Sun.dT(time));
 };
 
+Sun.t0_msec = Sun.eT(new Date(Date.UTC(1989, 11, 31, 0))).getTime(); // p.141
+
 // Sun's ecliptic longitude for Time
 Sun.lambda = function(time) {
 	return Sun.lambda_for_t(Sun.eT(time));
+};
+
+// Mean obliquity of the ecliptic
+Sun.mean_obliquity = function(et) {
+	var t = (et.getTime() - Sun.t0_msec)/(36525*24*3600*1000);
+	return 23.452294 - 0.0130125*t - 0.00000164*t*t + 0.000000503*t*t*t;
 };
