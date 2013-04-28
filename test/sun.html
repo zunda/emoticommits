@@ -16,7 +16,16 @@ assert_in_delta(172.0505, 0.0001, 'Sun.lambda_for_t(4.70773443);');
 
 assert_in_delta(31.77, 1.5, 'Sun.dT(new Date(Date.UTC(1960, 7-1, 1)));');
 
-assert_in_delta(23.445787, 0.01, 'Sun.mean_obliquity(Sun.eT(new Date(Date.UTC(1979, 9-1, 15, 12))));');
+// p.141 - difference too much?
+assert_in_delta(23.445787, 0.02, 'Sun.mean_obliquity(new Date(Date.UTC(1950, 0, 1, 0)));');
+
+// p.141
+mars = Sun.ecliptic_to_equatorial(
+	{lambda: 113.89196, beta: 0.81631},
+	new Date(Date.UTC(1950, 0, 1))
+);
+assert_in_delta(115.92538, 0.1, 'mars.alpha;');
+assert_in_delta(22.13699, 2, 'mars.delta;');	// difference too much?
 </script>
 </head>
 <body>

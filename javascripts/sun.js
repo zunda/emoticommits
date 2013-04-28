@@ -1,7 +1,10 @@
 // 「天体の位置計算 増補版」長沢 工著、地人書館、2001年、ISBN4-8052-0225-4
 var Sun = {
 	et0_msec: new Date(Date.UTC(1974, 11, 31, 0)).getTime(),	// p.206
-	sin_deg: function(deg){return Math.sin(deg / 180.0 * Math.PI);}
+	sin_deg: function(deg){return Math.sin(deg / 180.0 * Math.PI);},
+	cos_deg: function(deg){return Math.cos(deg / 180.0 * Math.PI);},
+	asin_deg: function(s){return Math.asin(s) * 180.0 / Math.PI;},
+	atan2_deg: function(y, x){return Math.atan2(y, x) * 180.0 / Math.PI;}
 };
 
 // Time Parameter for the time ET (Ephemeris Time) as a Date
@@ -56,8 +59,24 @@ Sun.lambda = function(time) {
 	return Sun.lambda_for_t(Sun.eT(time));
 };
 
-// Mean obliquity of the ecliptic
+// Mean obliquity of the ecliptic in degrees
 Sun.mean_obliquity = function(et) {
 	var t = (et.getTime() - Sun.t0_msec)/(36525*24*3600*1000);
 	return 23.452294 - 0.0130125*t - 0.00000164*t*t + 0.000000503*t*t*t;
+};
+
+// Ecliptic coordinate system to equatorial coordinate system
+// ecliptic = {lambda: deg, beta: deg}
+// returns {alpha: deg, delta: deg}
+Sun.ecliptic_to_equatorial = function(ecliptic, et) {
+	var u = Sun.cos_deg(ecliptic.beta) * Sun.cos_deg(ecliptic.lambda);
+	var v = Sun.cos_deg(ecliptic.beta) * Sun.sin_deg(ecliptic.lambda);
+	var w = Sun.sin_deg(ecliptic.beta);
+	var e = Sun.mean_obliquity(et);
+	var l = u;
+	var m = v*Sun.cos_deg(e) - w*Sun.sin_deg(e);
+	var n = v*Sun.sin_deg(e) - w*Sun.cos_deg(e);
+	var delta = Sun.asin_deg(n);
+	var alpha = Sun.atan2_deg(m, l);
+	return {alpha: alpha, delta: delta};
 };
