@@ -65,7 +65,7 @@ Sun.mean_obliquity = function(et) {
 	return 23.452294 - 0.0130125*t - 0.00000164*t*t + 0.000000503*t*t*t;
 };
 
-// Ecliptic coordinate system to equatorial coordinate system
+// Ecliptic coordinate system to equatorial coordinate system p.140
 // ecliptic = {lambda: deg, beta: deg}
 // returns {alpha: deg, delta: deg}
 Sun.ecliptic_to_equatorial = function(ecliptic, et) {
@@ -79,4 +79,10 @@ Sun.ecliptic_to_equatorial = function(ecliptic, et) {
 	var delta = Sun.asin_deg(n);
 	var alpha = Sun.atan2_deg(m, l);
 	return {alpha: alpha, delta: delta};
+};
+
+// Time from 1899-12-31 UTC in unit of 36525 days
+Sun.tu0_msec = new Date(Date.UTC(1899, 11, 31, 12)).getTime();
+Sun.tu = function(time) {
+	return (time.getTime() - Sun.tu0_msec)/(36525*24*3600*1000);
 };

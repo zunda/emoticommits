@@ -26,6 +26,10 @@ mars = Sun.ecliptic_to_equatorial(
 );
 assert_in_delta(115.92538, 0.1, 'mars.alpha;');
 assert_in_delta(22.13699, 2, 'mars.delta;');	// difference too much?
+
+// p.26
+one_minute = 1.0/(36525*24*60);	// in unit of 36525 days
+assert_in_delta(0.78438056126, one_minute, 'Sun.tu(new Date(Date.UTC(1978, 6-1, 10, 0)));');
 </script>
 </head>
 <body>
