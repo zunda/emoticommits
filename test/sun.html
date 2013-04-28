@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="../javascripts/sun.js"></script>
+<script type="text/javascript" src="assert.js"></script>
+<script type="text/javascript">
+assert_equal(0, 'Sun.t(new Date(Date.UTC(1974, 11, 31, 0)));');
+
+one_minute = 1.0/(365.25*24*60);	// in unit of 365.25 days
+target = 1719.5 / 365.25;	// The book shows 4.70773443 but seems to be off
+assert_in_delta(target, one_minute, 'Sun.t(new Date(Date.UTC(1979, 8, 15, 12)));');
+</script>
+</head>
+<body>
+</body>
+</html>
