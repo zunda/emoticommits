@@ -33,6 +33,33 @@ assert_in_delta(0.78438056126, one_minute, 'Sun.tu(new Date(Date.UTC(1978, 6-1, 
 
 // p.27
 assert_in_delta(257+59/60+40.41/3600, 1/3600, 'Sun.gst(new Date(Date.UTC(1978, 6-1, 10, 0)));');
+
+// http://en.wikipedia.org/wiki/Equinox
+// Northward equinox
+t = new Date(Date.UTC(2013, 3-1, 20, 11, 2));
+assert_in_delta(360, 1, 'Sun.lambda(t);');
+sun = Sun.alphadelta(t);
+assert_in_delta(0, 1, 'sun.alpha;');
+assert_in_delta(0, 1, 'sun.delta;');
+// Northern solstice
+t = new Date(Date.UTC(2013, 6-1, 21, 5, 4));
+assert_in_delta(90, 1, 'Sun.lambda(t);');
+sun = Sun.alphadelta(t);
+assert_in_delta(90, 1, 'sun.alpha;');
+assert_in_delta(23.4, 1, 'sun.delta;');
+// Southward equinox
+t = new Date(Date.UTC(2013, 9-1, 22, 20, 44));
+assert_in_delta(180, 1, 'Sun.lambda(t);');
+sun = Sun.alphadelta(t);
+assert_in_delta(180, 1, 'sun.alpha;');
+assert_in_delta(0, 1, 'sun.delta;');
+// Southern equinox
+t = new Date(Date.UTC(2013, 12-1, 21, 17, 11));
+assert_in_delta(270, 1, 'Sun.lambda(t);');
+sun = Sun.alphadelta(t);
+assert_in_delta(-90, 1, 'sun.alpha;');
+assert_in_delta(-23.4, 1, 'sun.delta;');
+
 </script>
 </head>
 <body>

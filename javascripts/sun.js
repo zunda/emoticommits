@@ -56,7 +56,7 @@ Sun.t0_msec = Sun.eT(new Date(Date.UTC(1989, 11, 31, 0))).getTime(); // p.141
 
 // Sun's ecliptic longitude for Time
 Sun.lambda = function(time) {
-	return Sun.lambda_for_t(Sun.eT(time));
+	return Sun.lambda_for_t(Sun.t(Sun.eT(time)));
 };
 
 // Mean obliquity of the ecliptic in degrees
@@ -93,3 +93,9 @@ Sun.gst = function(time) {
 	return ((6+38/60+45.836/3600)*15 +
 		8640184.542/3600*15*tu + 0.0929/3600*15*tu*tu) % 360;
 }
+
+// Location of Sun
+Sun.alphadelta = function(time) {
+	return Sun.ecliptic_to_equatorial(
+		{lambda: Sun.lambda(time), beta: 0}, Sun.eT(time));
+};
