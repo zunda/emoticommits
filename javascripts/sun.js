@@ -86,3 +86,10 @@ Sun.tu0_msec = new Date(Date.UTC(1899, 11, 31, 12)).getTime();
 Sun.tu = function(time) {
 	return (time.getTime() - Sun.tu0_msec)/(36525*24*3600*1000);
 };
+
+// Mean Greenwich Sidereal Time
+Sun.gst = function(time) {
+	tu = Sun.tu(time);
+	return ((6+38/60+45.836/3600)*15 +
+		8640184.542/3600*15*tu + 0.0929/3600*15*tu*tu) % 360;
+}
