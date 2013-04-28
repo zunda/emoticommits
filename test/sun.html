@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="../javascripts/sun.js"></script>
+<script type="text/javascript" src="assert.js"></script>
+<script type="text/javascript">
+assert_equal(0, 'Sun.t(new Date(Date.UTC(1974, 11, 31, 0)));');
+
+one_minute = 1.0/(365.25*24*60);	// in unit of 365.25 days
+target = 1719.5 / 365.25;
+// The book shows 4.70773443 on p.207 but seems to be off
+assert_in_delta(target, one_minute, 'Sun.t(new Date(Date.UTC(1979, 9-1, 15, 12)));');
+
+assert_in_delta(172.0505, 0.0001, 'Sun.lambda_for_t(4.70773443);');
+// using 4.70773443 as input as written in the book p.207
+
+assert_in_delta(31.77, 1.5, 'Sun.dT(new Date(Date.UTC(1960, 7-1, 1)));');
+</script>
+</head>
+<body>
+</body>
+</html>
