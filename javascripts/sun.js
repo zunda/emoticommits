@@ -87,7 +87,7 @@ Sun.tu = function(time) {
 	return (time.getTime() - Sun.tu0_msec)/(36525*24*3600*1000);
 };
 
-// Mean Greenwich Sidereal Time
+// Mean Greenwich Sidereal Time in degrees
 Sun.gst = function(time) {
 	tu = Sun.tu(time);
 	return ((6+38/60+45.836/3600)*15 +
@@ -99,3 +99,10 @@ Sun.alphadelta = function(time) {
 	return Sun.ecliptic_to_equatorial(
 		{lambda: Sun.lambda(time), beta: 0}, Sun.eT(time));
 };
+
+Sun.latlng = function(time) {
+	sun = Sun.alphadelta(time);
+	dt = (time.getTime() - new Date(Date.UTC(time.getUTCFullYear(), time.getUTCMonth(), time.getUTCDate())).getTime())/(24*3600*1000)*360;
+	drot = dt * 1.0027391	// p.25
+	return {lng: (sun.alpha - Sun.gst(time) - drot) % 360, lat: sun.delta};
+}
