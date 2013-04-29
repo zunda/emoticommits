@@ -22,8 +22,14 @@
         };
         map = new google.maps.Map(document.getElementById("map-canvas"),
           mapOptions);
-				sun = Sun.latlng(new Date(Date.UTC(2013, 3-1, 20, 11, 4)));
-				//sun = Sun.latlng(new Date());
+				// Northward equinox
+				t = new Date(Date.UTC(2013, 3-1, 20, 11, 4));
+				// Northern solstice
+				t = new Date(Date.UTC(2013, 6-1, 21, 5, 4));
+				// Southward equinox solstice
+				t = new Date(Date.UTC(2013, 9-1, 22, 20, 44));
+				sun = Sun.latlng(new Date(t));
+				alert(sun.lat);
 				// Summer
 				paths = [[
 					{lat: -90, lng: sun.lng - 180},
