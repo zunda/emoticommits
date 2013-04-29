@@ -4,5 +4,4 @@
 # git clone git@github.com:zunda/emoticommits.git emoticommits-gh-pages
 # cd emoticommits-gh-pages
 # git checkout gh-pages
-30 * * * * cd ~/local/src/emoticommits-gh-pages; git pull -q; ~/local/bin/ruby ~/local/src/emoticommits/bin/create_markers.rb ~/var/locations.sqlite ~/var/events.sqlite ~/local/src/emoticommits-gh-pages/markers 1; git add markers/*.json; git commit -q -m 'auto commit'; git push -q origin gh-pages
-
+30 * * * * cd ~/local/src/emoticommits-gh-pages; git pull -q; ~/local/bin/ruby ~/local/src/emoticommits/bin/create_markers.rb ~/var/locations.sqlite ~/var/events.sqlite ~/local/src/emoticommits-gh-pages/markers 1; git add markers/*.json.gz; git commit -q -m 'auto commit'; git push -q origin gh-pages
