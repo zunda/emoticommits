@@ -14,6 +14,7 @@
     <script type="text/javascript">
       var map;
       var markerZ = 0;
+			var shadowPolygon = new Array;
       function initialize() {
         var mapOptions = {
           center: new google.maps.LatLng(0, 0),
@@ -22,54 +23,89 @@
         };
         map = new google.maps.Map(document.getElementById("map-canvas"),
           mapOptions);
-				// Northward equinox
-				t = new Date(Date.UTC(2013, 3-1, 20, 11, 4));
-				// Northern solstice
-				t = new Date(Date.UTC(2013, 6-1, 21, 5, 4));
-				// Southward equinox solstice
-				t = new Date(Date.UTC(2013, 9-1, 22, 20, 44));
-				sun = Sun.latlng(new Date(t));
-				alert(sun.lat);
-				// Summer
-				paths = [[
-					{lat: -90, lng: sun.lng - 180},
-					{lat: 90 - sun.lat, lng: sun.lng - 180},
-					{lat: 0, lng: sun.lng - 90},
-					{lat: -90, lng: sun.lng - 90},
-				],[
-					{lat: -90, lng: sun.lng - 90},
-					{lat: 0, lng: sun.lng - 90},
-					{lat: sun.lat - 90, lng: sun.lng},
-					{lat: -90, lng: sun.lng + 180},
-				],[
-					{lat: -90, lng: sun.lng + 180},
-					{lat: 90 - sun.lat, lng: sun.lng + 180},
-					{lat: 0, lng: sun.lng + 90},
-					{lat: -90, lng: sun.lng + 90},
-				],[
-					{lat: -90, lng: sun.lng + 90},
-					{lat: 0, lng: sun.lng + 90},
-					{lat: sun.lat - 90, lng: sun.lng},
-					{lat: -90, lng: sun.lng},
-				]];
-				for(i = 0; i < paths.length; i+= 1) {
-					ps = new Array;
-					for(j = 0; j < paths[i].length; j += 1) {
-						ps.push(new google.maps.LatLng(paths[i][j].lat, paths[i][j].lng));
-					}
-					new google.maps.Polygon({
-						paths: ps,
-						strokeColor: "#000",
-						strokeOpacity: 0,
-						strokeWeight: 0,
-						fillColor: "#000",
-						fillOpacity: 0.25,
-						geodesic: true,
-						zIndex: -1,
-						map: map
-					})
-				};
+				polygon = new google.maps.Polygon({
+					paths: shadowPolygon,
+					strokeColor: "#000",
+					strokeOpacity: 0,
+					strokeWeight: 0,
+					fillColor: "#000",
+					fillOpacity: 0.25,
+					geodesic: true,
+					zIndex: -1,
+					map: map
+				})
+				setInterval(function(){nextShadow(polygon);}, 10);
 			};
+
+			function shadowPaths(time) {
+				sun = Sun.latlng(time);
+				if (sun.lat >= 0) {
+					ps = [[
+						{lat: -90, lng: sun.lng + 180},
+						{lat: 90 - sun.lat, lng: sun.lng + 180},
+						{lat: 0, lng: sun.lng + 90},
+						{lat: -90, lng: sun.lng + 90},
+					],[
+						{lat: -90, lng: sun.lng - 180},
+						{lat: 90 - sun.lat, lng: sun.lng - 180},
+						{lat: 0, lng: sun.lng - 90},
+						{lat: -90, lng: sun.lng - 90},
+					],[
+						{lat: -90, lng: sun.lng - 90},
+						{lat: 0, lng: sun.lng - 90},
+						{lat: sun.lat - 90, lng: sun.lng},
+						{lat: -90, lng: sun.lng},
+					],[
+						{lat: -90, lng: sun.lng + 90},
+						{lat: 0, lng: sun.lng + 90},
+						{lat: sun.lat - 90, lng: sun.lng},
+						{lat: -90, lng: sun.lng},
+					]];
+				} else {
+					ps = [[
+						{lat: 90, lng: sun.lng + 180},
+						{lat: -90 - sun.lat, lng: sun.lng + 180},
+						{lat: 0, lng: sun.lng + 90},
+						{lat: 90, lng: sun.lng + 90},
+					],[
+						{lat: 90, lng: sun.lng - 180},
+						{lat: -90 - sun.lat, lng: sun.lng - 180},
+						{lat: 0, lng: sun.lng - 90},
+						{lat: 90, lng: sun.lng - 90},
+					],[
+						{lat: 90, lng: sun.lng - 90},
+						{lat: 0, lng: sun.lng - 90},
+						{lat: sun.lat + 90, lng: sun.lng},
+						{lat: 90, lng: sun.lng},
+					],[
+						{lat: 90, lng: sun.lng + 90},
+						{lat: 0, lng: sun.lng + 90},
+						{lat: sun.lat + 90, lng: sun.lng},
+						{lat: 90, lng: sun.lng},
+					]];
+				}
+				rs = new Array;
+				for(i = 0; i < ps.length; i += 1) {
+					rs.push(new Array);
+					for(j = 0; j < ps[i].length; j += 1) {
+						rs[i].push(new google.maps.LatLng(ps[i][j].lat, ps[i][j].lng));
+					};
+				};
+				return rs;
+			}
+
+			//time = new Date();	// current
+			//time = new Date(Date.UTC(2013, 3-1, 20, 11, 4)); // Northward equinox
+			//time = new Date(Date.UTC(2013, 6-1, 21, 5, 4)); // Northern solstice
+			time = new Date(Date.UTC(2013, 9-1, 22, 20, 44)); // Southward equinox
+			//time = new Date(Date.UTC(2013, 12-1, 21, 17, 11)); // Southern solstice
+			//time = new Date(time.getTime() - 24*3600*1000);
+			function nextShadow(p) {
+				p.setPaths(shadowPaths(time));
+				console.log(time);
+				time = new Date(time.getTime() + 24*3600*1000);
+			}
+
 			window.onload = initialize;
     </script>
   </head>
