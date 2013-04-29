@@ -108,3 +108,52 @@ Sun.latlng = function(time) {
 	if (lng > 180) {lng -= 360;}
 	return {lng: lng, lat: sun.delta};
 }
+
+Sun.shadowPaths = function(time) {
+	sun = Sun.latlng(time);
+	if (sun.lat >= 0) {
+		return [[
+			{lat: -90, lng: sun.lng + 180},
+			{lat: 90 - sun.lat, lng: sun.lng + 180},
+			{lat: 0, lng: sun.lng + 90},
+			{lat: -90, lng: sun.lng + 90},
+		],[
+			{lat: -90, lng: sun.lng - 180},
+			{lat: 90 - sun.lat, lng: sun.lng - 180},
+			{lat: 0, lng: sun.lng - 90},
+			{lat: -90, lng: sun.lng - 90},
+		],[
+			{lat: -90, lng: sun.lng - 90},
+			{lat: 0, lng: sun.lng - 90},
+			{lat: sun.lat - 90, lng: sun.lng},
+			{lat: -90, lng: sun.lng},
+		],[
+			{lat: -90, lng: sun.lng + 90},
+			{lat: 0, lng: sun.lng + 90},
+			{lat: sun.lat - 90, lng: sun.lng},
+			{lat: -90, lng: sun.lng},
+		]];
+	} else {
+		return [[
+			{lat: 90, lng: sun.lng + 180},
+			{lat: -90 - sun.lat, lng: sun.lng + 180},
+			{lat: 0, lng: sun.lng + 90},
+			{lat: 90, lng: sun.lng + 90},
+		],[
+			{lat: 90, lng: sun.lng - 180},
+			{lat: -90 - sun.lat, lng: sun.lng - 180},
+			{lat: 0, lng: sun.lng - 90},
+			{lat: 90, lng: sun.lng - 90},
+		],[
+			{lat: 90, lng: sun.lng - 90},
+			{lat: 0, lng: sun.lng - 90},
+			{lat: sun.lat + 90, lng: sun.lng},
+			{lat: 90, lng: sun.lng},
+		],[
+			{lat: 90, lng: sun.lng + 90},
+			{lat: 0, lng: sun.lng + 90},
+			{lat: sun.lat + 90, lng: sun.lng},
+			{lat: 90, lng: sun.lng},
+		]];
+	}
+};

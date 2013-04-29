@@ -8,6 +8,7 @@
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/emoji.css">
     <script type="text/javascript" src="javascripts/markers.js"></script>
+    <script type="text/javascript" src="javascripts/sun.js"></script>
     <script type="text/javascript">
       var page_time;
       var mapwindow;
@@ -58,6 +59,10 @@
         loaded_basename =
           markersBasename(new Date(page_time.getTime()));
         loadMarkers(loaded_basename, markers);
+
+				setInterval(function(){
+					mapwindow.shadow.setArrays(Sun.shadowPaths(page_time));
+				}, 60000);
       };
       window.onload = initialize;
     </script>

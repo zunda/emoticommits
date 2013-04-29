@@ -12,6 +12,7 @@
     </script>
     <script type="text/javascript">
       var map;
+			var shadow;
       var markerZ = 0;
       function initialize() {
         var mapOptions = {
@@ -21,7 +22,27 @@
         };
         map = new google.maps.Map(document.getElementById("map-canvas"),
           mapOptions);
+				shadow = new google.maps.Polygon({
+					strokeColor: "#000",
+					strokeOpacity: 0,
+					strokeWeight: 0,
+					fillColor: "#000",
+					fillOpacity: 0.25,
+					geodesic: true,
+					zIndex: -1,
+					map: map
+				});
       };
+			shadow.setArrays = function(ary) {
+				r = new Array;
+				for(i = 0; i < ary.length; i += 1) {
+					r.push(new Array);
+					for(j = 0; j < ary[i].length; j += 1) {
+						r[i].push(new google.maps.LatLng(ary[i][j].lat, ary[i][j].lng);
+					}
+				}
+				shadow.setPaths(r);
+			};
       function dropPin(lat, lng, icon, size, linkurl) {
         var marker = new google.maps.Marker({
           map: map,
