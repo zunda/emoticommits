@@ -56,14 +56,13 @@
           }
         }, 1000);
 				setInterval(function(){
-					mapwindow.shadow.setArrays(Sun.shadowPaths(page_time));
+					mapwindow.setShadowArrays(Sun.shadowPaths(page_time));
 				}, 60000);
         updateClocks();
-				mapwindow.shadow.setArrays(Sun.shadowPaths(page_time));
+				mapwindow.setShadowArrays(Sun.shadowPaths(page_time));
         loaded_basename =
           markersBasename(new Date(page_time.getTime()));
         loadMarkers(loaded_basename, markers);
-
       };
       window.onload = initialize;
     </script>
