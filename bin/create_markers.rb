@@ -59,9 +59,9 @@ $log = Syslog::Logger.new("#{File.basename($0, '.rb')}-#{t0.strftime("%H%M%S")}"
 		end
 	end
 
-	dstpath = File.join(dstdir, t1.utc.strftime("%Y%m%d%H.json.gz"))
-	Zlib::GzipWriter.open(dstpath) do |gz|
-		gz.print markers.to_json
+	dstpath = File.join(dstdir, t1.utc.strftime("%Y%m%d%H.json"))
+	File.open(dstpath, 'w') do |f|
+		f.print markers.to_json
 	end
 	$log.info("Created in #{dstpath} #{markers.size} markers from #{events.size} events")
 end
