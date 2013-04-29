@@ -16,7 +16,7 @@ function markersBasename(time) {
 
 function loadMarkers(basename, markers) {
   var http = new XMLHttpRequest();
-  http.open('GET', "markers/" + basename + ".json");
+  http.open('GET', "markers/" + basename + ".json.gz");
   http.send(null);
   loaded_markers_basename = basename;
   http.onreadystatechange = function() {
