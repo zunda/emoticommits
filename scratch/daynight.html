@@ -22,27 +22,29 @@
         };
         map = new google.maps.Map(document.getElementById("map-canvas"),
           mapOptions);
-				sun = Sun.latlng(new Date());
+				sun = Sun.latlng(new Date(Date.UTC(2013, 3-1, 20, 11, 4)));
+				//sun = Sun.latlng(new Date());
+				// Summer
 				paths = [[
-					{lat: 0, lng: sun.lng - 180},
+					{lat: -90, lng: sun.lng - 180},
 					{lat: 90 - sun.lat, lng: sun.lng - 180},
-					{lat: 0, lng: sun.lng - 90}
+					{lat: 0, lng: sun.lng - 90},
+					{lat: -90, lng: sun.lng - 90},
 				],[
+					{lat: -90, lng: sun.lng - 90},
 					{lat: 0, lng: sun.lng - 90},
 					{lat: sun.lat - 90, lng: sun.lng},
-					{lat: -90, lng: sun.lng}
+					{lat: -90, lng: sun.lng + 180},
 				],[
-					{lat: sun.lat - 90, lng: sun.lng},
-					{lat: 0, lng: sun.lng + 90},
-					{lat: -90, lng: sun.lng + 90}
-				],[
-					{lat: 0, lng: sun.lng + 90},
+					{lat: -90, lng: sun.lng + 180},
 					{lat: 90 - sun.lat, lng: sun.lng + 180},
-					{lat: 0, lng: sun.lng + 180}
+					{lat: 0, lng: sun.lng + 90},
+					{lat: -90, lng: sun.lng + 90},
 				],[
-					{lat: 0, lng: sun.lng - 270},
-					{lat: 0, lng: sun.lng - 90},
-					{lat: -90, lng: sun.lng - 180}
+					{lat: -90, lng: sun.lng + 90},
+					{lat: 0, lng: sun.lng + 90},
+					{lat: sun.lat - 90, lng: sun.lng},
+					{lat: -90, lng: sun.lng},
 				]];
 				for(i = 0; i < paths.length; i+= 1) {
 					ps = new Array;

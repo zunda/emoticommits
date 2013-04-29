@@ -104,5 +104,7 @@ Sun.latlng = function(time) {
 	sun = Sun.alphadelta(time);
 	dt = (time.getTime() - new Date(Date.UTC(time.getUTCFullYear(), time.getUTCMonth(), time.getUTCDate())).getTime())/(24*3600*1000)*360;
 	drot = dt * 1.0027391	// p.25
-	return {lng: (sun.alpha - Sun.gst(time) - drot) % 360, lat: sun.delta};
+	lng = (sun.alpha - Sun.gst(time) - drot) % 360;
+	if (lng > 180) {lng -= 360;}
+	return {lng: lng, lat: sun.delta};
 }
