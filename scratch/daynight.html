@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+      html { height: 100% }
+      body { height: 100%; margin: 0; padding: 0 }
+      #map-canvas { height: 100% }
+    </style>
+    <script type="text/javascript"
+      src="http://maps.googleapis.com/maps/api/js?sensor=false">
+    </script>
+    <script type="text/javascript" src="../javascripts/sun.js"></script>
+    <script type="text/javascript">
+      var map;
+      var markerZ = 0;
+      function initialize() {
+        var mapOptions = {
+          center: new google.maps.LatLng(0, 0),
+          zoom: 1,
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        map = new google.maps.Map(document.getElementById("map-canvas"),
+          mapOptions);
+				sun = Sun.latlng(new Date());
+				paths = [[
+					{lat: 0, lng: sun.lng - 180},
+					{lat: 90 - sun.lat, lng: sun.lng - 180},
+					{lat: 0, lng: sun.lng - 90}
+				],[
+					{lat: 0, lng: sun.lng - 90},
+					{lat: sun.lat - 90, lng: sun.lng},
+					{lat: -90, lng: sun.lng}
+				],[
+					{lat: sun.lat - 90, lng: sun.lng},
+					{lat: 0, lng: sun.lng + 90},
+					{lat: -90, lng: sun.lng + 90}
+				],[
+					{lat: 0, lng: sun.lng + 90},
+					{lat: 90 - sun.lat, lng: sun.lng + 180},
+					{lat: 0, lng: sun.lng + 180}
+				],[
+					{lat: 0, lng: sun.lng - 270},
+					{lat: 0, lng: sun.lng - 90},
+					{lat: -90, lng: sun.lng - 180}
+				]];
+				for(i = 0; i < paths.length; i+= 1) {
+					ps = new Array;
+					for(j = 0; j < paths[i].length; j += 1) {
+						ps.push(new google.maps.LatLng(paths[i][j].lat, paths[i][j].lng));
+					}
+					new google.maps.Polygon({
+						paths: ps,
+						strokeColor: "#000",
+						strokeOpacity: 0,
+						strokeWeight: 0,
+						fillColor: "#000",
+						fillOpacity: 0.25,
+						geodesic: true,
+						zIndex: -1,
+						map: map
+					})
+				};
+			};
+			window.onload = initialize;
+    </script>
+  </head>
+  <body>
+    <div id="map-canvas"/>
+  </body>
+</html>
