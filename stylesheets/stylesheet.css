@@ -40,6 +40,19 @@ p, form {
   font-size: 1em;
 }
 
+select {
+  background: #108eef;
+  color: white;
+  border: none;
+}
+
+select option {
+  background: #ffffff;
+  color: #000000;
+  border: none;
+}
+
+
 a {
   text-decoration: none;
   color: #108eef;
