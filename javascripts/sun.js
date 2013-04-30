@@ -96,13 +96,16 @@ Sun.mean_obliquity = function(et) {
 // ecliptic = {lambda: deg, beta: deg}
 // returns {alpha: deg, delta: deg}
 Sun.ecliptic_to_equatorial = function(ecliptic, et) {
-	var u = Sun.cos_deg(ecliptic.beta) * Sun.cos_deg(ecliptic.lambda);
-	var v = Sun.cos_deg(ecliptic.beta) * Sun.sin_deg(ecliptic.lambda);
+  var cos_beta = Sun.cos_deg(ecliptic.beta);
+	var u = cos_beta * Sun.cos_deg(ecliptic.lambda);
+	var v = cos_beta * Sun.sin_deg(ecliptic.lambda);
 	var w = Sun.sin_deg(ecliptic.beta);
 	var e = Sun.mean_obliquity(et);
 	var l = u;
-	var m = v*Sun.cos_deg(e) - w*Sun.sin_deg(e);
-	var n = v*Sun.sin_deg(e) - w*Sun.cos_deg(e);
+  var cos_e = Sun.cos_deg(e);
+  var sin_e = Sun.sin_deg(e);
+	var m = v*cos_e - w*sin_e;
+	var n = v*sin_e - w*cos_e;
 	var delta = Sun.asin_deg(n);
 	var alpha = Sun.atan2_deg(m, l);
 	return {alpha: alpha, delta: delta};
