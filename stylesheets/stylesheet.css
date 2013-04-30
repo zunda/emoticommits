@@ -45,8 +45,12 @@ a {
   color: #108eef;
 }
 
+a img {
+  border: none;
+}
+
 a:hover {
-  color: #209eff;
+  color: #30aeff;
 }
 
 div#main {
