@@ -16,3 +16,7 @@ A server runs [record_activity.rb](bin/record_activity.rb) as an [hourly cron jo
 The [map](http://zunda.github.io/emoticommits/) loads a JSON file of markers, which show commits or comments along with users' location, every hour on 50 minutes.
 
 As the map shows evetns of either 24 hours ago or 7 days ago, JSON files of markers for 23 hours ago and 7 days minus 1 hour ago are created, by [create_markers.rb] (bin/create_markers.rb) as another [cron job](etc/crontab), from the local databases every hour and automatically committed and pushed to the [GitHub pages](http://zunda.github.io/emoticommits/).
+
+License
+-------
+Please see the [LICENSE file](LICENSE.md) file.
