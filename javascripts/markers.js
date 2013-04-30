@@ -42,7 +42,6 @@ function loadMarkers(basename, markers, page_time) {
   var http = new XMLHttpRequest();
   http.open('GET', "markers/" + basename + ".json");
   http.send(null);
-  loaded_markers_basename = basename;
   http.onreadystatechange = function() {
     if ((http.readyState == 4) && (http.status == 200)) {
       JSON.parse(http.responseText).forEach(function(marker) {
