@@ -132,7 +132,9 @@ Sun.alphadelta = function(time) {
 
 Sun.latlng = function(time) {
 	var sun = Sun.alphadelta(time);
-	var dt = (time.getTime() - new Date(Date.UTC(time.getUTCFullYear(), time.getUTCMonth(), time.getUTCDate())).getTime())/(24*3600*1000)*360;
+	var dt = (time.getTime() - new Date(
+      Date.UTC(time.getUTCFullYear(), time.getUTCMonth(), time.getUTCDate())
+    ).getTime())/(24*3600*1000)*360;
 	var drot = dt * 1.0027391	// p.25
 	var lng = (sun.alpha - Sun.gst(time) - drot) % 360;
 	if (lng > 180) {lng -= 360;}
