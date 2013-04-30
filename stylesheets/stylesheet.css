@@ -34,7 +34,7 @@ h1 {
   font-weight: bold;
 }
 
-p {
+p, form {
   padding: 0;
   margin: 0.2em 0.5em 0.2em 0.5em;
   font-size: 1em;

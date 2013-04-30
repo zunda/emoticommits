@@ -38,7 +38,7 @@ function markersBasename(time) {
   return basename
 }
 
-function loadMarkers(basename, markers) {
+function loadMarkers(basename, markers, page_time) {
   var http = new XMLHttpRequest();
   http.open('GET', "markers/" + basename + ".json");
   http.send(null);
@@ -79,6 +79,7 @@ function addMarkers(page_time, wall_time, markers, conf, mapwindow) {
     }
   };
 };
+
 function removeMarkers(wall_time, markers, mapwindow) {
   while(markers.avatars.length > 0 && markers.avatars[0].until < wall_time) {
     mapwindow.removePin(markers.avatars.shift().marker);
@@ -86,4 +87,8 @@ function removeMarkers(wall_time, markers, mapwindow) {
   while(markers.emoticons.length > 0 && markers.emoticons[0].until < wall_time) {
     mapwindow.removePin(markers.emoticons.shift().marker);
   }
+}
+
+function clearMarkers(markers) {
+  markers.queue.length = 0;
 }
