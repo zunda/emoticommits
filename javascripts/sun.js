@@ -116,7 +116,7 @@ Sun.tu = function(time) {
 
 // Mean Greenwich Sidereal Time in degrees
 Sun.gst = function(time) {
-	tu = Sun.tu(time);
+	var tu = Sun.tu(time);
 	return ((6+38/60+45.836/3600)*15 +
 		8640184.542/3600*15*tu + 0.0929/3600*15*tu*tu) % 360;
 }
@@ -128,16 +128,16 @@ Sun.alphadelta = function(time) {
 };
 
 Sun.latlng = function(time) {
-	sun = Sun.alphadelta(time);
-	dt = (time.getTime() - new Date(Date.UTC(time.getUTCFullYear(), time.getUTCMonth(), time.getUTCDate())).getTime())/(24*3600*1000)*360;
-	drot = dt * 1.0027391	// p.25
-	lng = (sun.alpha - Sun.gst(time) - drot) % 360;
+	var sun = Sun.alphadelta(time);
+	var dt = (time.getTime() - new Date(Date.UTC(time.getUTCFullYear(), time.getUTCMonth(), time.getUTCDate())).getTime())/(24*3600*1000)*360;
+	var drot = dt * 1.0027391	// p.25
+	var lng = (sun.alpha - Sun.gst(time) - drot) % 360;
 	if (lng > 180) {lng -= 360;}
 	return {lng: lng, lat: sun.delta};
 }
 
 Sun.shadowPaths = function(time) {
-	sun = Sun.latlng(time);
+	var sun = Sun.latlng(time);
 	if (sun.lat >= 0) {
 		return [[
 			{lat: -90, lng: sun.lng + 180},
