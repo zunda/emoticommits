@@ -19,4 +19,4 @@ As the map shows evetns of either 24 hours ago or 7 days ago, JSON files of mark
 
 License
 -------
-Please see the [LICENSE file](LICENSE.md) file.
+Please see the [LICENSE file](LICENSE.md).
