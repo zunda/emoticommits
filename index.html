@@ -1,109 +1,91 @@
 <!DOCTYPE html>
 <html>
+<head>
+  <meta charset='utf-8' />
+  <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+  <meta name="description" content="Emoticommits : Commits and comments with emotions are good for your health :smile:" />
+  <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css">
+  <link rel="stylesheet" type="text/css" href="stylesheets/emoji.css">
+  <script type="text/javascript" src="javascripts/markers.js"></script>
+  <script type="text/javascript" src="javascripts/sun.js"></script>
+  <script type="text/javascript">
+    var page_time;
+    var mapwindow;
 
-  <head>
-    <meta charset='utf-8' />
-    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="Emoticommits : Commits and comments with emotions are good for your health :smile:" />
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/emoji.css">
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/forkme.css">
-    <script type="text/javascript" src="javascripts/markers.js"></script>
-    <script type="text/javascript" src="javascripts/sun.js"></script>
-    <script type="text/javascript">
-      var page_time;
-      var mapwindow;
+    var marker_conf = {
+      avatar: {
+        duration: 600*1000, // 10 min
+        size: 32
+      },
+      emoticon: {
+        duration: 1800*1000, // 30 min
+        size: 48
+      }
+    };
 
-      var marker_conf = {
-        avatar: {
-          duration: 600*1000, // 10 min
-          size: 32
-        },
-        emoticon: {
-          duration: 1800*1000, // 30 min
-          size: 48
-        }
-      };
+    var markers_queue = new Array;
+    var loaded_basename;
 
-      var markers_queue = new Array;
-      var loaded_basename;
+    var markers = {
+      queue: new Array,
+      avatars: new Array,
+      emoticons: new Array,
+    };
 
-      var markers = {
-        queue: new Array,
-        avatars: new Array,
-        emoticons: new Array,
-      };
+    var time_offset = -24*3600*1000; // 1 day, for now
+    var fetch_offset = 15*60*1000*(0.5+Math.random());  // 7.5-22.5 minutes
+    function updateClocks() {
+      var wall_time = new Date();
+      page_time = new Date(wall_time.getTime() + time_offset);
+      document.getElementById("page_clock").innerHTML = page_time.toLocaleString();
+      addMarkers(page_time, wall_time, markers, marker_conf, mapwindow);
+      removeMarkers(wall_time, markers, mapwindow);
+    };
 
-      var time_offset = -24*3600*1000; // 1 day, for now
-      var fetch_offset = 15*60*1000*(0.5+Math.random());  // 7.5-22.5 minutes
-      function updateClocks() {
-        var wall_time = new Date();
-        page_time = new Date(wall_time.getTime() + time_offset);
-        document.getElementById("wall_clock").innerHTML = wall_time.toLocaleString();
-        document.getElementById("page_clock").innerHTML = page_time.toLocaleString();
-        addMarkers(page_time, wall_time, markers, marker_conf, mapwindow);
-        removeMarkers(wall_time, markers, mapwindow);
-      };
-
-      function initialize() {
-        mapwindow = document.getElementById("mapframe").contentWindow;
-        setInterval(function(){
-          updateClocks();
-          basename = 
-            markersBasename(new Date(page_time.getTime() + fetch_offset));
-          if (basename != loaded_basename) {
-            loadMarkers(basename, markers);
-            loaded_basename = basename;
-          }
-        }, 1000);
-				setInterval(function(){
-					mapwindow.setShadowArrays(Sun.shadowPaths(page_time));
-				}, 60000);
+    function initialize() {
+      mapwindow = document.getElementById("mapframe").contentWindow;
+      setInterval(function(){
         updateClocks();
-				mapwindow.setShadowArrays(Sun.shadowPaths(page_time));
-        loaded_basename =
-          markersBasename(new Date(page_time.getTime()));
-        loadMarkers(loaded_basename, markers);
-      };
-      window.onload = initialize;
-    </script>
+        basename = 
+          markersBasename(new Date(page_time.getTime() + fetch_offset));
+        if (basename != loaded_basename) {
+          loadMarkers(basename, markers);
+          loaded_basename = basename;
+        }
+      }, 1000);
+      setInterval(function(){
+        mapwindow.setShadowArrays(Sun.shadowPaths(page_time));
+      }, 60000);
+      updateClocks();
+      mapwindow.setShadowArrays(Sun.shadowPaths(page_time));
+      loaded_basename =
+        markersBasename(new Date(page_time.getTime()));
+      loadMarkers(loaded_basename, markers);
+    };
+    window.onload = initialize;
+  </script>
 
-    <title>Emoticommits</title>
-  </head>
+  <title>Emoticommits</title>
+</head>
 
-  <body>
+<body>
+<div id="header">
+  <h1>Emoticommits</h1>
+  <p>Commits and comments with emotions are good for your health
+    <img class="emoji" title=":smile:" alt=":smile:" src="http://assets.github.com/images/icons/emoji/smile.png">.
+    The map shows <em>some of</em> activites of <a href="http://github.com">GitHub
+    <img class="emoji" title=":octocat:" alt=":octocat:" src="http://assets.github.com/images/icons/emoji/octocat.png"></a>
+    users.
+    See <a href="https://github.com/zunda/emoticommits#readme">repository page</a> for details.</p>
+</div>
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/zunda/emoticommits">View on GitHub</a>
+<div id="control">
+  <p>24 hours ago at <span id="page_clock">page clock</span></p>
+</div>
 
-          <h1 id="project_title">Emoticommits</h1>
-          <h2 id="project_tagline">Commits and comments with emotions are good for your health <img class="emoji" title=":smile:" alt=":smile:" src="http://assets.github.com/images/icons/emoji/smile.png"></h2>
-
-        </header>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-      <div class="center">
-        <p><span id="wall_clock">Wall clock</span> <span id="page_clock">Page clock</span></p>
-        <iframe id="mapframe" src="./map.html" class="mapframe"
-          frameBorder="0" scrolling="no"></iframe>
-      </div>
-      </section>
-    </div>
-
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p>Emoticommits is maintained by <a href="https://github.com/zunda">zunda</a> and
-        published at <a href="http://zunda.github.io/emoticommits">http://zunda.github.io/emoticommits</a> with <a href="http://pages.github.com">GitHub Pages</a></p>
-      </footer>
-    </div>
-
-    
-
-  </body>
+<div id="main">
+  <iframe id="mapframe" src="./map.html" class="mapframe"
+    frameBorder="0" scrolling="no"></iframe>
+</div>
+</body>
 </html>
