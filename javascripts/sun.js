@@ -96,14 +96,14 @@ Sun.mean_obliquity = function(et) {
 // ecliptic = {lambda: deg, beta: deg}
 // returns {alpha: deg, delta: deg}
 Sun.ecliptic_to_equatorial = function(ecliptic, et) {
-  var cos_beta = Sun.cos_deg(ecliptic.beta);
+	var cos_beta = Sun.cos_deg(ecliptic.beta);
 	var u = cos_beta * Sun.cos_deg(ecliptic.lambda);
 	var v = cos_beta * Sun.sin_deg(ecliptic.lambda);
 	var w = Sun.sin_deg(ecliptic.beta);
 	var e = Sun.mean_obliquity(et);
 	var l = u;
-  var cos_e = Sun.cos_deg(e);
-  var sin_e = Sun.sin_deg(e);
+	var cos_e = Sun.cos_deg(e);
+	var sin_e = Sun.sin_deg(e);
 	var m = v*cos_e - w*sin_e;
 	var n = v*sin_e - w*cos_e;
 	var delta = Sun.asin_deg(n);
@@ -133,8 +133,8 @@ Sun.alphadelta = function(time) {
 Sun.latlng = function(time) {
 	var sun = Sun.alphadelta(time);
 	var dt = (time.getTime() - new Date(
-      Date.UTC(time.getUTCFullYear(), time.getUTCMonth(), time.getUTCDate())
-    ).getTime())/(24*3600*1000)*360;
+			Date.UTC(time.getUTCFullYear(), time.getUTCMonth(), time.getUTCDate())
+		).getTime())/(24*3600*1000)*360;
 	var drot = dt * 1.0027391	// p.25
 	var lng = (sun.alpha - Sun.gst(time) - drot) % 360;
 	if (lng > 180) {lng -= 360;}
