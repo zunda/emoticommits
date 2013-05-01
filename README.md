@@ -3,7 +3,7 @@ Emoticommits
 
 Commits and comments with emotions are good for your health :smile:
 
-Have a look at http://zunda.github.io/emoticommits/. The map shows commits and comments of GitHub :octocat: users, along with their avatars, or, better than those, emoticons :smiley: from commit messages or comments. Please note that *not all activities are shown*.
+Have a look at http://zunda.github.io/emoticommits/. The map shows commits and comments of GitHub :octocat: users, along with their avatars, or, better than those, emoticons :smiley: from commit messages or comments. Please note that *not all activities are shown*. Click the icons to have a look at the activities on GitHub.
 
 The idea of showing acitivities on a world map heavily comes from the late [Hello world! - greetings to the planet](http://www.lizard-tail.com/isana/lab/hello_world/) by which showed greetings from Twitter users real time. The big difference seems to be that the GitHub users do not care much if it is day :sunny: or night :moon:
 
@@ -19,6 +19,16 @@ As the map shows evetns of either 24 hours ago or 7 days ago, JSON files of mark
 
 ### Displaying night on the map
 The [map](http://zunda.github.io/emoticommits/) shows day and night areas through [sun.js](../gh-pages/javascripts/sun.js). The JavaScript calculates direction (latitude and longitude) of the Sun on the earth and creates paths, as great cicles on the Earth surface, for the night shade divided into four areas. A [```google.maps.Polygon```](https://developers.google.com/maps/documentation/javascript/reference#Polygon) converts the great circles onto the Mercator map with the [```geodesic: true``` option](https://developers.google.com/maps/documentation/javascript/reference#PolylineOptions).
+
+Fork
+----
+When you fork:fork_and_knife: the repository, please kindly change the API key for Google Map in [map.html](../gh-pages/map.html) to yours. To access GitHub API frequently, [record_activity.rb](bin/record_activity.rb) reads your username and password from ```~/.githubarchiverc```, which should look something like below:
+
+```
+@github_auth = ['username', 'password']
+```
+
+To automatically create and update JSON files to be posted to the GitHub pages, a working copy of the ```gh-pages``` branch should be checked out and the path to that copy should be set to the command line argument for ```create_markers.rb```(bin/create_markers.rb) in [crontab](etc/crontab).
 
 License
 -------
