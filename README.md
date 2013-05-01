@@ -3,9 +3,9 @@ emoticommits
 
 Commits and comments with emotions are good for your health :smile:
 
-Have a look at http://zunda.github.io/emoticommits/. The map shows commits and comments of GitHub users, along with their avatars, or, better than those, emoticons :smiley: from commit messages or comments. Please note that *not all activities are shown*.
+Have a look at http://zunda.github.io/emoticommits/. The map shows commits and comments of GitHub :octocat: users, along with their avatars, or, better than those, emoticons :smiley: from commit messages or comments. Please note that *not all activities are shown*.
 
-The idea of showing acitivities on a world map heavily comes from the late [Hello world! - greetings to the planet](http://www.lizard-tail.com/isana/lab/hello_world/) by which showed greetings from Twitter users real time. The big difference seems to be that the GitHub users do not care much about if it is day or night :grinning:
+The idea of showing acitivities on a world map heavily comes from the late [Hello world! - greetings to the planet](http://www.lizard-tail.com/isana/lab/hello_world/) by which showed greetings from Twitter users real time. The big difference seems to be that the GitHub users do not care much about if it is day :sunny: or night :moon:
 
 Implementation
 --------------
