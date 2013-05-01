@@ -8,8 +8,8 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100%;
-  background: black;
-  color: white;
+  background: #202040;
+  color: #e0e0e0;
   font-family: sans-serif;
 }
 
@@ -75,7 +75,7 @@ div#description > p {
 
 select, input {
   background: #108eef;
-  color: white;
+  color: #e0e0f0;
   border: none;
 }
 
@@ -84,8 +84,8 @@ input[disabled] {
 }
 
 select option {
-  background: #ffffff;
-  color: #000000;
+  background: #e0e0e0;
+  color: #202040;
   border: none;
 }
 
