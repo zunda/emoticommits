@@ -70,11 +70,15 @@
 
     function zoomToInitial() {
       mapwindow.zoomToInitial();
+      document.getElementById("zoom_back").disabled = true;
     }
 
     function initialize() {
       mapwindow = document.getElementById("mapframe").contentWindow;
       changeOffset();
+      mapwindow.onViewChanged(function(){
+        document.getElementById("zoom_back").disabled = false;
+      });
       setInterval(function(){
         mapwindow.setShadowArrays(Sun.shadowPaths(page_time));
       }, 60000);
@@ -109,7 +113,8 @@
   </div>
   <div id="control_right">
     <form>
-      <input type="button" value="Zoom back" onClick="zoomToInitial()">
+      <input id="zoom_back" type="button" value="Zoom back"
+        onClick="zoomToInitial()" disabled>
     </form>
   </div>
 </div>

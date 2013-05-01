@@ -79,6 +79,10 @@ select, input {
   border: none;
 }
 
+input[disabled] {
+  color: #30aeff;
+}
+
 select option {
   background: #ffffff;
   color: #000000;

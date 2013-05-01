@@ -39,6 +39,10 @@
       function zoomToInitial() {
         map.setOptions(initialZoom);
       };
+      function onViewChanged(func) {
+        google.maps.event.addListener(map, 'zoom_changed', func);
+        google.maps.event.addListener(map, 'dragend', func);
+      }
 			function setShadowArrays(ary) {
 				r = new Array;
 				for(i = 0; i < ary.length; i += 1) {
