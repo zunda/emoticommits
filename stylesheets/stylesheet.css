@@ -1,6 +1,7 @@
 html {
   margin: 0;
   min-height: 100%;
+  overflow: hidden;
 }
 
 body {
@@ -18,8 +19,18 @@ div {
 }
 
 div#header {
-  height: 5.5em;
-  overflow: hidden;
+  height: 2.6em;
+  display: table;
+}
+
+div#title {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+div#description {
+  display: table-cell;
+  vertical-align: middle;
 }
 
 div#control {
@@ -29,15 +40,25 @@ div#control {
 
 h1 {
   padding: 0;
-  margin: 0.2em 0.5em 0.2em 0.5em;
+  margin: 0.5em;
   font-size: 1.5em;
   font-weight: bold;
+}
+
+div#description > h1 {
+  overflow: hidden;
+  height: 2.6em;
 }
 
 p, form {
   padding: 0;
   margin: 0.2em 0.5em 0.2em 0.5em;
   font-size: 1em;
+}
+
+div#description > p {
+  overflow: hidden;
+  max-height: 2.6em;
 }
 
 select {
@@ -51,7 +72,6 @@ select option {
   color: #000000;
   border: none;
 }
-
 
 a {
   text-decoration: none;
@@ -70,8 +90,8 @@ div#main {
   display: block;
   position: absolute;
   height: auto;
-  top:  7.5em;
-  bottom: 0.5em;
+  top:  5em;
+  bottom: 0em;
   width: 100%;
 }
 
