@@ -38,6 +38,18 @@ div#control {
   overflow: hidden;
 }
 
+div#control_left {
+  float: left;
+}
+
+div#control_right {
+  float: right;
+}
+
+div#control:after {
+  clear: both;
+}
+
 h1 {
   padding: 0;
   margin: 0.5em;
@@ -61,7 +73,7 @@ div#description > p {
   max-height: 2.6em;
 }
 
-select {
+select, input {
   background: #108eef;
   color: white;
   border: none;
@@ -90,7 +102,7 @@ div#main {
   display: block;
   position: absolute;
   height: auto;
-  top:  5em;
+  top:  5.5em;
   bottom: 0em;
   width: 100%;
 }

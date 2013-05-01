@@ -14,12 +14,14 @@
       var map;
 			var shadow;
       var markerZ = 0;
+      var initialZoom = {
+        center: new google.maps.LatLng(0, 0),
+        zoom: 2
+      };
       function initialize() {
-        var mapOptions = {
-          center: new google.maps.LatLng(0, 0),
-          zoom: 2,
-          mapTypeId: google.maps.MapTypeId.ROADMAP
-        };
+        var mapOptions = {mapTypeId: google.maps.MapTypeId.ROADMAP};
+        mapOptions.center = initialZoom.center;
+        mapOptions.zoom = initialZoom.zoom;
         map = new google.maps.Map(document.getElementById("map-canvas"),
           mapOptions);
 				shadow = new google.maps.Polygon({
@@ -33,6 +35,9 @@
 					zIndex: -1,
 					map: map
 				});
+      };
+      function zoomToInitial() {
+        map.setOptions(initialZoom);
       };
 			function setShadowArrays(ary) {
 				r = new Array;

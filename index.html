@@ -68,6 +68,10 @@
       startUpdate();
     }
 
+    function zoomToInitial() {
+      mapwindow.zoomToInitial();
+    }
+
     function initialize() {
       mapwindow = document.getElementById("mapframe").contentWindow;
       changeOffset();
@@ -96,10 +100,18 @@
 </div>
 
 <div id="control">
-  <form><select id="select_offset" onChange="changeOffset()">
-    <option value="1">24 hours</option>
-    <option selected value="7">7 days</option>
-  </select> ago at <span id="page_clock">page clock</span></form>
+  <div id="control_left">
+    <form><select id="select_offset" onChange="changeOffset()">
+      <option value="1">24 hours</option>
+      <option selected value="7">7 days</option>
+      </select> ago at <span id="page_clock">page clock</span>
+    </form>
+  </div>
+  <div id="control_right">
+    <form>
+      <input type="button" value="Zoom back" onClick="zoomToInitial()">
+    </form>
+  </div>
 </div>
 
 <div id="main">
