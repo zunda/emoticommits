@@ -1,4 +1,4 @@
-emoticommits
+Emoticommits
 ============
 
 Commits and comments with emotions are good for your health :smile:
