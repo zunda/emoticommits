@@ -24,7 +24,7 @@ The [map](http://zunda.github.io/emoticommits/) shows day and night areas throug
 
 Fork
 ----
-When you fork:fork_and_knife: the repository, please kindly change the API key for Google Map in [map.html](../gh-pages/map.html) to yours. To access GitHub API frequently, [record_activity.rb](bin/record_activity.rb) reads your username and password from ~/.githubarchiverc, which should look something like below:
+When you fork:fork_and_knife: the repository, please kindly change the API key for Google Map in [map.html](../gh-pages/map.html) to yours. When you heavily change behavior accessing the GitHub or Google APIs, we would like to ask you to change the ```User-Agent``` string defined as ```AGENT``` constant in [githubapi.rb](lib/githubapi.rb) or [geocoding.rb](lib/geocoding.rb). To access GitHub API frequently, [record_activity.rb](bin/record_activity.rb) reads your username and password from ~/.githubarchiverc, which should look something like below:
 
 ```
 @github_auth = ['username', 'password']
