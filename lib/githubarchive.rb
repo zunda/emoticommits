@@ -168,7 +168,7 @@ module GitHubArchive
 					raise EventParseIgnorableError.new(message)
 				when '500', '502'	# Internal Server Error, Bad Gateway
 					raise EventParseRetryableError.new(message)
-				when '403', '401', '409'	# we might have hit rate limit
+				when '403', '401', '409', '503'	# we might have hit rate limit
 					raise EventParseToWaitError.new(message)
 				else
 					raise e
