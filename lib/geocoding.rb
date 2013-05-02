@@ -35,7 +35,7 @@ module GoogleApi
 	class Geocoding
 		URL = URI::parse('http://maps.googleapis.com/maps/api/geocode/json')
 		VERSION = '0.0.0'
-		AGENT = "zunda@gmail.com - GoogleApi - #{VERSION}"
+		AGENT = "zundan@gmail.com - GoogleApi - #{VERSION}"
 
 		def Geocoding.schema
 			{'timestamp' => Time, 'address' => Float, 'lat' => Float, 'lng' => Float, 'status' => String}
