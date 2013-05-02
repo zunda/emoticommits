@@ -176,7 +176,7 @@ module GitHubArchive
 			rescue Net::HTTPBadResponse, Errno::ETIMEDOUT => e
 				message = "#{e.message} (#{e.class}) for #{api_query.json_url} from #{api_query.type}"
 				raise EventParseRetryableError.new(message)
-			rescue SocketError, Errno::ENETUNREACH => e
+			rescue SocketError, Errno::ENETUNREACH, Errno::ECONNREFUSED => e
 				message = "#{e.message} (#{e.class}) for #{api_query.json_url} from #{api_query.type}"
 				raise EventParseToWaitError.new(message)
 			end
