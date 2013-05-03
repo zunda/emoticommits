@@ -29,15 +29,13 @@ var MarkerQueue = {
 MarkerQueue.basename = function(time) {
   var basename = time.getUTCFullYear();
   var m = time.getUTCMonth() + 1;
-  if (m < 10) {
-    basename += "0";
-  }
+  if (m < 10) {basename += "0";}
   basename += m;
-  basename += time.getUTCDate();
+	var d = time.getUTCDate();
+	if (d < 10) {basename += "0";}
+  basename += d;
   var h = time.getUTCHours();
-  if (h < 10) {
-    basename += "0";
-  }
+  if (h < 10) {basename += "0";}
   basename += h;
   return basename
 };
