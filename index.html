@@ -6,7 +6,7 @@
   <meta name="description" content="Emoticommits : Commits and comments with emotions are good for your health :smile:" />
   <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css">
   <link rel="stylesheet" type="text/css" href="stylesheets/emoji.css">
-  <script type="text/javascript" src="javascripts/markers.js"></script>
+  <script type="text/javascript" src="javascripts/markerqueue.js"></script>
   <script type="text/javascript" src="javascripts/sun.js"></script>
   <script type="text/javascript">
     var page_time;
@@ -37,9 +37,9 @@
       updater = setInterval(function(){
         updateClocks();
         basename = 
-          markersBasename(new Date(page_time.getTime() + fetch_offset));
+          MarkerQueue.basename(new Date(page_time.getTime() + fetch_offset));
         if (basename != loaded_basename) {
-          loadMarkers(basename, markers, page_time);
+          MarkerQueue.load(basename, markers, page_time);
           loaded_basename = basename;
         }
       }, 1000);
@@ -51,20 +51,20 @@
       var wall_time = new Date();
       page_time = new Date(wall_time.getTime() + time_offset);
       document.getElementById("page_clock").innerHTML = page_time.toLocaleString();
-      addMarkers(page_time, wall_time, markers, marker_conf, mapwindow);
-      removeMarkers(wall_time, markers, mapwindow);
+      MarkerQueue.add(page_time, wall_time, markers, marker_conf, mapwindow);
+      MarkerQueue.remove(wall_time, markers, mapwindow);
     };
 
     function changeOffset() {
       clearInterval(updater);
-      clearMarkers(markers);
+      MarkerQueue.clear(markers);
       s = document.getElementById('select_offset');
       time_offset = -24*3600*1000 * s.options[s.selectedIndex].value;
       updateClocks();
       mapwindow.setShadowArrays(Sun.shadowPaths(page_time));
       loaded_basename =
-        markersBasename(new Date(page_time.getTime()));
-      loadMarkers(loaded_basename, markers, page_time);
+        MarkerQueue.basename(new Date(page_time.getTime()));
+      MarkerQueue.load(loaded_basename, markers, page_time);
       startUpdate();
     }
 

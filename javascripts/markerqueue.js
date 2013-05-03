@@ -22,7 +22,9 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //
 
-function markersBasename(time) {
+var MarkerQueue = {};
+
+MarkerQueue.basename = function(time) {
   var basename = time.getUTCFullYear();
   var m = time.getUTCMonth() + 1;
   if (m < 10) {
@@ -36,9 +38,9 @@ function markersBasename(time) {
   }
   basename += h;
   return basename
-}
+};
 
-function loadMarkers(basename, markers, page_time) {
+MarkerQueue.load = function(basename, markers, page_time) {
   var http = new XMLHttpRequest();
   http.open('GET', "markers/" + basename + ".json");
   http.send(null);
@@ -53,7 +55,7 @@ function loadMarkers(basename, markers, page_time) {
   };
 };
 
-function addMarkers(page_time, wall_time, markers, conf, mapwindow) {
+MarkerQueue.add = function(page_time, wall_time, markers, conf, mapwindow) {
   while(
     markers.queue.length > 0 &&
     new Date(markers.queue[0].time) < page_time
@@ -79,7 +81,7 @@ function addMarkers(page_time, wall_time, markers, conf, mapwindow) {
   };
 };
 
-function removeMarkers(wall_time, markers, mapwindow) {
+MarkerQueue.remove = function(wall_time, markers, mapwindow) {
   while(markers.avatars.length > 0 && markers.avatars[0].until < wall_time) {
     mapwindow.removePin(markers.avatars.shift().marker);
   }
@@ -88,6 +90,6 @@ function removeMarkers(wall_time, markers, mapwindow) {
   }
 }
 
-function clearMarkers(markers) {
+MarkerQueue.clear = function(markers) {
   markers.queue.length = 0;
 }
