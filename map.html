@@ -12,7 +12,7 @@
     </script>
     <script type="text/javascript">
       var map;
-			var shadow;
+      var shadow;
       var markerZ = 0;
       var initialZoom = {
         center: new google.maps.LatLng(0, 0),
@@ -24,17 +24,17 @@
         mapOptions.zoom = initialZoom.zoom;
         map = new google.maps.Map(document.getElementById("map-canvas"),
           mapOptions);
-				shadow = new google.maps.Polygon({
-					paths: new Array,
-					strokeColor: "#000",
-					strokeOpacity: 0,
-					strokeWeight: 0,
-					fillColor: "#000",
-					fillOpacity: 0.25,
-					geodesic: true,
-					zIndex: -1,
-					map: map
-				});
+        shadow = new google.maps.Polygon({
+          paths: new Array,
+          strokeColor: "#000",
+          strokeOpacity: 0,
+          strokeWeight: 0,
+          fillColor: "#000",
+          fillOpacity: 0.25,
+          geodesic: true,
+          zIndex: -1,
+          map: map
+        });
       };
       function zoomToInitial() {
         map.setOptions(initialZoom);
@@ -43,16 +43,16 @@
         google.maps.event.addListener(map, 'zoom_changed', func);
         google.maps.event.addListener(map, 'dragend', func);
       }
-			function setShadowArrays(ary) {
-				r = new Array;
-				for(i = 0; i < ary.length; i += 1) {
-					r.push(new Array);
-					for(j = 0; j < ary[i].length; j += 1) {
-						r[i].push(new google.maps.LatLng(ary[i][j].lat, ary[i][j].lng));
-					};
-				};
-				shadow.setPaths(r);
-			};
+      function setShadowArrays(ary) {
+        r = new Array;
+        for(i = 0; i < ary.length; i += 1) {
+          r.push(new Array);
+          for(j = 0; j < ary[i].length; j += 1) {
+            r[i].push(new google.maps.LatLng(ary[i][j].lat, ary[i][j].lng));
+          };
+        };
+        shadow.setPaths(r);
+      };
       function dropPin(lat, lng, icon, size, linkurl) {
         var marker = new google.maps.Marker({
           map: map,
@@ -67,9 +67,9 @@
           zIndex: markerZ
         });
         markerZ += 1;
-				google.maps.event.addListener(marker, 'click', function(){
-					window.open(linkurl);
-				});
+        google.maps.event.addListener(marker, 'click', function(){
+          window.open(linkurl);
+        });
         return marker;
       };
       function removePin(marker) {
