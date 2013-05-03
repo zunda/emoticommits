@@ -24,13 +24,13 @@ The [map](http://zunda.github.io/emoticommits/) shows day and night areas throug
 
 Fork
 ----
-When you fork:fork_and_knife: the repository, please kindly change the API key for Google Map in [map.html](../gh-pages/map.html) to yours. To access GitHub API frequently, [record_activity.rb](bin/record_activity.rb) reads your username and password from ```~/.githubarchiverc```, which should look something like below:
+When you fork:fork_and_knife: the repository, please kindly change the API key for Google Map in [map.html](../gh-pages/map.html) to yours. When you heavily change behavior accessing the GitHub or Google APIs, we would like to ask you to change the ```User-Agent``` string defined as ```AGENT``` constant in [githubapi.rb](lib/githubapi.rb) or [geocoding.rb](lib/geocoding.rb). To access GitHub API frequently, [record_activity.rb](bin/record_activity.rb) reads your username and password from ~/.githubarchiverc, which should look something like below:
 
 ```
 @github_auth = ['username', 'password']
 ```
 
-To automatically create and update JSON files to be posted to the GitHub pages, a working copy of the ```gh-pages``` branch should be checked out and the path to that copy should be set to the command line argument for [create_markers.rb](bin/create_markers.rb) in [crontab](etc/crontab).
+To automatically create and update JSON files to be posted to the GitHub pages, a working copy of the ```gh-pages``` branch should be checked out and the path to that copy should be set to the command line argument for [create_markers.rb](bin/create_markers.rb) in [crontab](etc/crontab). While normal operations, progress of the processes are logged with ```Syslog::Logger#info``` presumably to /var/log/messages.
 
 License
 -------
