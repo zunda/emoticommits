@@ -22,7 +22,9 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //
 
-var MarkerQueue = {};
+var MarkerQueue = {
+  zIndex = 0;
+};
 
 MarkerQueue.basename = function(time) {
   var basename = time.getUTCFullYear();
@@ -64,15 +66,20 @@ MarkerQueue.add = function(page_time, wall_time, markers, conf, mapwindow) {
     var icon = marker.icon;
     var size;
     var until;
+    var index;
     if (marker.emotion) {
       size = conf.emoticon.size;
       until = new Date(wall_time.getTime() + conf.emoticon.duration);
+      index = MarkerQueue.zIndex + 100;
     } else {
       size = conf.avatar.size;
       icon += "?s=" + conf.avatar.size;
       until = new Date(wall_time.getTime() + conf.avatar.duration);
+      index = MarkerQueue.zIndex;
     };
-    var pin = mapwindow.dropPin(marker.lat, marker.lng, icon, size, marker.url);
+    var pin = mapwindow.dropPin(
+      marker.lat, marker.lng, icon, size, marker.url, index);
+    MarkerQueue.zIndex += 1;
     if (marker.emotion) {
       markers.emoticons.push({until: until, marker: pin});
     } else {

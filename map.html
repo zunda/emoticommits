@@ -13,7 +13,6 @@
     <script type="text/javascript">
       var map;
       var shadow;
-      var markerZ = 0;
       var initialZoom = {
         center: new google.maps.LatLng(0, 0),
         zoom: 2
@@ -53,7 +52,7 @@
         };
         shadow.setPaths(r);
       };
-      function dropPin(lat, lng, icon, size, linkurl) {
+      function dropPin(lat, lng, icon, size, linkurl, zIndex) {
         var marker = new google.maps.Marker({
           map: map,
           draggable: false,
@@ -64,9 +63,8 @@
             scaledSize: new google.maps.Size(size, size),
             anchor: new google.maps.Point(size/2, size/2),
           },
-          zIndex: markerZ
+          zIndex: zIndex
         });
-        markerZ += 1;
         google.maps.event.addListener(marker, 'click', function(){
           window.open(linkurl);
         });
