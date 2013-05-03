@@ -30,7 +30,7 @@ When you fork:fork_and_knife: the repository, please kindly change the API key f
 @github_auth = ['username', 'password']
 ```
 
-To automatically create and update JSON files to be posted to the GitHub pages, a working copy of the ```gh-pages``` branch should be checked out and the path to that copy should be set to the command line argument for [create_markers.rb](bin/create_markers.rb) in [crontab](etc/crontab). While normal operations, progress of the processes are logged with ```Syslog::Logger#info``` presumably to /var/log/messages.
+To automatically create and update JSON files to be posted to the GitHub pages, a working copy of the ```gh-pages``` branch should be checked out and the path to that copy should be set to the command line argument for [create_markers.rb](bin/create_markers.rb) in [crontab](etc/crontab). While normal operations, progress of the processes are logged with ```Syslog::Logger#info``` presumably to /var/log/messages. A passphraseless SSH key maybe needed to automtically push to GitHub pages.
 
 License
 -------
