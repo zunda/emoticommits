@@ -23,7 +23,7 @@
 //
 
 var MarkerQueue = {
-  zIndex: 0;
+  zIndex: 0
 };
 
 MarkerQueue.basename = function(time) {
