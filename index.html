@@ -58,6 +58,7 @@
     function changeOffset() {
       clearInterval(updater);
       MarkerQueue.clear(markers);
+      MarkerQueue.removeAll(markers, mapwindow);
       s = document.getElementById('select_offset');
       time_offset = -24*3600*1000 * s.options[s.selectedIndex].value;
       updateClocks();

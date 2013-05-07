@@ -95,6 +95,15 @@ MarkerQueue.remove = function(wall_time, markers, mapwindow) {
   }
 }
 
+MarkerQueue.removeAll = function(markers, mapwindow) {
+  while(markers.avatars.length > 0) {
+    mapwindow.removePin(markers.avatars.shift().marker);
+  }
+  while(markers.emoticons.length > 0) {
+    mapwindow.removePin(markers.emoticons.shift().marker);
+  }
+}
+
 MarkerQueue.clear = function(markers) {
   markers.queue.length = 0;
 }
