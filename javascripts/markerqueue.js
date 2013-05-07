@@ -57,7 +57,7 @@ MarkerQueue.load = function(basename, markers, page_time) {
           markers.queue = markers.queue.concat(loaded);
         } else {
           // Sometimes old markers come after new markers
-          markers.queue = loaded.queue.concat(markers.queue);
+          markers.queue = loaded.concat(markers.queue);
         };
         markers.loading = false;
       };
