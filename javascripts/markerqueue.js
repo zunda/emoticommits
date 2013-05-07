@@ -46,11 +46,19 @@ MarkerQueue.load = function(basename, markers, page_time) {
   http.send(null);
   http.onreadystatechange = function() {
     if ((http.readyState == 4) && (http.status == 200)) {
-      JSON.parse(http.responseText).forEach(function(marker) {
-        if (page_time < new Date(marker.time)) {
-          markers.queue.push(marker);
-        }
+      var loaded = JSON.parse(http.responseText).filter(function(marker) {
+        return (page_time < new Date(marker.time));
       });
+      if (loaded.length > 0) {
+        if (markers.queue.length < 1 ||
+          markers.queue[markers.queue.length - 1].time < loaded[0].time) {
+          // Normal sequence in loading markers
+          markers.queue = markers.queue.concat(loaded);
+        } else {
+          // Sometimes old markers come after new markers
+          markers.queue = loaded.queue.concat(markers.queue);
+        };
+      };
     };
   };
 };
