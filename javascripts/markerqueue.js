@@ -46,43 +46,55 @@ MarkerQueue.load = function(basename, markers, page_time) {
   http.send(null);
   http.onreadystatechange = function() {
     if ((http.readyState == 4) && (http.status == 200)) {
-      JSON.parse(http.responseText).forEach(function(marker) {
-        if (page_time < new Date(marker.time)) {
-          markers.queue.push(marker);
-        }
+      var loaded = JSON.parse(http.responseText).filter(function(marker) {
+        return (page_time < new Date(marker.time));
       });
+      if (loaded.length > 0) {
+        markers.loading = true;
+        if (markers.queue.length < 1 ||
+          markers.queue[markers.queue.length - 1].time < loaded[0].time) {
+          // Normal sequence in loading markers
+          markers.queue = markers.queue.concat(loaded);
+        } else {
+          // Sometimes old markers come after new markers
+          markers.queue = loaded.queue.concat(markers.queue);
+        };
+        markers.loading = false;
+      };
     };
   };
 };
 
 MarkerQueue.add = function(page_time, wall_time, markers, conf, mapwindow) {
-  while(
-    markers.queue.length > 0 &&
-    new Date(markers.queue[0].time) < page_time
-  ) {
-    var marker = markers.queue.shift();
-    var icon = marker.icon;
-    var size;
-    var until;
-    var index;
-    if (marker.emotion) {
-      size = conf.emoticon.size;
-      until = new Date(wall_time.getTime() + conf.emoticon.duration);
-      index = MarkerQueue.zIndex + 1000;
-    } else {
-      size = conf.avatar.size;
-      icon += "?s=" + conf.avatar.size;
-      until = new Date(wall_time.getTime() + conf.avatar.duration);
-      index = MarkerQueue.zIndex;
+  if (! markers.loading) {
+    while(
+      markers.queue.length > 0 &&
+      new Date(markers.queue[0].time) < page_time
+    ) {
+      var marker = markers.queue.shift();
+      var icon = marker.icon;
+      var size;
+      var until;
+      var index;
+      if (marker.emotion) {
+        size = conf.emoticon.size;
+        until = new Date(wall_time.getTime() + conf.emoticon.duration);
+        index = MarkerQueue.zIndex + 1000;
+      } else {
+        size = conf.avatar.size;
+        icon += "?s=" + conf.avatar.size;
+        until = new Date(wall_time.getTime() + conf.avatar.duration);
+        index = MarkerQueue.zIndex;
+      };
+      var pin = mapwindow.dropPin(
+        marker.lat, marker.lng, icon, size, marker.url, index);
+      MarkerQueue.zIndex += 1;
+      if (marker.emotion) {
+        markers.emoticons.push({until: until, marker: pin});
+      } else {
+        markers.avatars.push({until: until, marker: pin});
+      }
     };
-    var pin = mapwindow.dropPin(
-      marker.lat, marker.lng, icon, size, marker.url, index);
-    MarkerQueue.zIndex += 1;
-    if (marker.emotion) {
-      markers.emoticons.push({until: until, marker: pin});
-    } else {
-      markers.avatars.push({until: until, marker: pin});
-    }
   };
 };
 
