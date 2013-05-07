@@ -76,7 +76,7 @@ MarkerQueue.add = function(page_time, wall_time, markers, conf, mapwindow) {
     if (marker.emotion) {
       size = conf.emoticon.size;
       until = new Date(wall_time.getTime() + conf.emoticon.duration);
-      index = MarkerQueue.zIndex + 100;
+      index = MarkerQueue.zIndex + 1000;
     } else {
       size = conf.avatar.size;
       icon += "?s=" + conf.avatar.size;
