@@ -23,7 +23,11 @@
 //
 
 var MarkerQueue = {
-  zIndex: 0
+  zIndex: 0,
+  queue: new Array,
+  loading: false,
+  avatars: new Array,
+  emoticons: new Array
 };
 
 MarkerQueue.basename = function(time) {
@@ -40,7 +44,7 @@ MarkerQueue.basename = function(time) {
   return basename
 };
 
-MarkerQueue.load = function(basename, markers, page_time) {
+MarkerQueue.load = function(basename, page_time) {
   var http = new XMLHttpRequest();
   http.open('GET', "markers/" + basename + ".json");
   http.send(null);
@@ -50,28 +54,28 @@ MarkerQueue.load = function(basename, markers, page_time) {
         return (page_time < new Date(marker.time));
       });
       if (loaded.length > 0) {
-        markers.loading = true;
-        if (markers.queue.length < 1 ||
-          markers.queue[markers.queue.length - 1].time < loaded[0].time) {
+        MarkerQueue.loading = true;
+        if (MarkerQueue.queue.length < 1 ||
+          MarkerQueue.queue[MarkerQueue.queue.length - 1].time < loaded[0].time) {
           // Normal sequence in loading markers
-          markers.queue = markers.queue.concat(loaded);
+          MarkerQueue.queue = MarkerQueue.queue.concat(loaded);
         } else {
           // Sometimes old markers come after new markers
-          markers.queue = loaded.queue.concat(markers.queue);
+          MarkerQueue.queue = loaded.queue.concat(MarkerQueue.queue);
         };
-        markers.loading = false;
+        MarkerQueue.loading = false;
       };
     };
   };
 };
 
-MarkerQueue.add = function(page_time, wall_time, markers, conf, mapwindow) {
-  if (! markers.loading) {
+MarkerQueue.add = function(page_time, wall_time, conf, mapwindow) {
+  if (! MarkerQueue.loading) {
     while(
-      markers.queue.length > 0 &&
-      new Date(markers.queue[0].time) < page_time
+      MarkerQueue.queue.length > 0 &&
+      new Date(MarkerQueue.queue[0].time) < page_time
     ) {
-      var marker = markers.queue.shift();
+      var marker = MarkerQueue.queue.shift();
       var icon = marker.icon;
       var size;
       var until;
@@ -90,32 +94,32 @@ MarkerQueue.add = function(page_time, wall_time, markers, conf, mapwindow) {
         marker.lat, marker.lng, icon, size, marker.url, index);
       MarkerQueue.zIndex += 1;
       if (marker.emotion) {
-        markers.emoticons.push({until: until, marker: pin});
+        MarkerQueue.emoticons.push({until: until, marker: pin});
       } else {
-        markers.avatars.push({until: until, marker: pin});
+        MarkerQueue.avatars.push({until: until, marker: pin});
       }
     };
   };
 };
 
-MarkerQueue.remove = function(wall_time, markers, mapwindow) {
-  while(markers.avatars.length > 0 && markers.avatars[0].until < wall_time) {
-    mapwindow.removePin(markers.avatars.shift().marker);
+MarkerQueue.remove = function(wall_time, mapwindow) {
+  while(MarkerQueue.avatars.length > 0 && MarkerQueue.avatars[0].until < wall_time) {
+    mapwindow.removePin(MarkerQueue.avatars.shift().marker);
   }
-  while(markers.emoticons.length > 0 && markers.emoticons[0].until < wall_time) {
-    mapwindow.removePin(markers.emoticons.shift().marker);
-  }
-}
-
-MarkerQueue.removeAll = function(markers, mapwindow) {
-  while(markers.avatars.length > 0) {
-    mapwindow.removePin(markers.avatars.shift().marker);
-  }
-  while(markers.emoticons.length > 0) {
-    mapwindow.removePin(markers.emoticons.shift().marker);
+  while(MarkerQueue.emoticons.length > 0 && MarkerQueue.emoticons[0].until < wall_time) {
+    mapwindow.removePin(MarkerQueue.emoticons.shift().marker);
   }
 }
 
-MarkerQueue.clear = function(markers) {
-  markers.queue.length = 0;
+MarkerQueue.removeAll = function(mapwindow) {
+  while(MarkerQueue.avatars.length > 0) {
+    mapwindow.removePin(MarkerQueue.avatars.shift().marker);
+  }
+  while(MarkerQueue.emoticons.length > 0) {
+    mapwindow.removePin(MarkerQueue.emoticons.shift().marker);
+  }
+}
+
+MarkerQueue.clear = function() {
+  MarkerQueue.queue.length = 0;
 }

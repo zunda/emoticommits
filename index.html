@@ -25,12 +25,6 @@
 
     var loaded_basename;
 
-    var markers = {
-      queue: new Array,
-      avatars: new Array,
-      emoticons: new Array,
-    };
-
     var updater;
     function startUpdate() {
       updater = setInterval(function(){
@@ -38,7 +32,7 @@
         basename = 
           MarkerQueue.basename(new Date(page_time.getTime() + fetch_offset));
         if (basename != loaded_basename) {
-          MarkerQueue.load(basename, markers, page_time);
+          MarkerQueue.load(basename, page_time);
           loaded_basename = basename;
         }
       }, 1000);
@@ -50,21 +44,21 @@
       var wall_time = new Date();
       page_time = new Date(wall_time.getTime() + time_offset);
       document.getElementById("page_clock").innerHTML = page_time.toLocaleString();
-      MarkerQueue.add(page_time, wall_time, markers, marker_conf, mapwindow);
-      MarkerQueue.remove(wall_time, markers, mapwindow);
+      MarkerQueue.add(page_time, wall_time, marker_conf, mapwindow);
+      MarkerQueue.remove(wall_time, mapwindow);
     };
 
     function changeOffset() {
       clearInterval(updater);
-      MarkerQueue.clear(markers);
-      MarkerQueue.removeAll(markers, mapwindow);
+      MarkerQueue.clear();
+      MarkerQueue.removeAll(mapwindow);
       s = document.getElementById('select_offset');
       time_offset = -24*3600*1000 * s.options[s.selectedIndex].value;
       updateClocks();
       mapwindow.setShadowArrays(Sun.shadowPaths(page_time));
       loaded_basename =
         MarkerQueue.basename(new Date(page_time.getTime()));
-      MarkerQueue.load(loaded_basename, markers, page_time);
+      MarkerQueue.load(loaded_basename, page_time);
       startUpdate();
     }
 
