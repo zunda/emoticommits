@@ -55,7 +55,11 @@ $log = Syslog::Logger.new("#{File.basename($0, '.rb')}-#{t0.strftime("%H%M%S")}"
 	events.each do |event|
 		location = locationdb.retrieve('locations', GoogleApi::Geocoding, 'WHERE address=?', event.location)[0]
 		if location and location.status == 'OK'
-			markers << Marker.new(event, location)
+			begin
+				markers << Marker.new(event, location)
+			rescue Emoji::Error => e
+				$log.error(e.message + " - ignoring")
+			end
 		end
 	end
 

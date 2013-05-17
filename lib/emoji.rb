@@ -25,10 +25,16 @@
 require 'emojis'
 
 module Emoji
+	class Error < StandardError; end
+
 	class Scanner
 		def Scanner.first_emoji(string)
 			return nil unless string
-			e = string.scan(%r|:([\w\+\-]+):|)[0]
+			begin
+				e = string.scan(%r|:([\w\+\-]+):|)[0]
+			rescue ArgumentError => err	# invalid byte sequence in UTF-8
+				raise Error, "#{err.message} #{string.inspect}"
+			end
 			return e && e[0] && EMOJIS.include?(e[0]) ? ":#{e[0]}:" : nil
 		end
 	end

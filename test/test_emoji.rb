@@ -1,3 +1,4 @@
+# Encoding: utf-8
 #
 # Copyright (c) 2013 zunda <zunda at freeshell.org>
 #
@@ -66,5 +67,10 @@ class TestScanner < Test::Unit::TestCase
 
 	def test_nil
 		assert_equal(nil, Emoji::Scanner.first_emoji(nil))
+	end
+
+	def test_invalid_utf8
+		# For ruby >= 1.9
+		assert_raises(Emoji::Error){Emoji::Scanner.first_emoji("\xc3\x28")}
 	end
 end
