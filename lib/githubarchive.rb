@@ -164,11 +164,11 @@ module GitHubArchive
 			rescue OpenURI::HTTPError => e
 				message = "#{e.message} (#{e.class}) for #{api_query.json_url} from #{api_query.type}"
 				case e.message[0..2]
-				when '404'	# Not Found
+				when '404', '409'	# Not Found, Conflict
 					raise EventParseIgnorableError.new(message)
 				when '500', '502'	# Internal Server Error, Bad Gateway
 					raise EventParseRetryableError.new(message)
-				when '403', '401', '409', '503'	# we might have hit rate limit
+				when '403', '401', '503'	# we might have hit rate limit
 					raise EventParseToWaitError.new(message)
 				else
 					raise e
