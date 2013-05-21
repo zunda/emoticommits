@@ -23,6 +23,7 @@
 #
 
 require 'net/http'	# for Net::HTTPBadResponse
+require 'openssl'	# for OpenSSL::SSL::SSLError
 
 require 'githubapi'
 require 'sqlite3if'
@@ -173,7 +174,7 @@ module GitHubArchive
 				else
 					raise e
 				end
-			rescue Net::HTTPBadResponse, Errno::ETIMEDOUT => e
+			rescue Net::HTTPBadResponse, Errno::ETIMEDOUT, OpenSSL::SSL::SSLError => e
 				message = "#{e.message} (#{e.class}) for #{api_query.json_url} from #{api_query.type}"
 				raise EventParseRetryableError.new(message)
 			rescue SocketError, Errno::ENETUNREACH, Errno::ECONNREFUSED => e
