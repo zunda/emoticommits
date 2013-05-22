@@ -30,7 +30,7 @@ require 'sqlite3if'
 require 'emoji'
 
 class Marker
-	GravatarUrl = 'http://www.gravatar.com/avatar/%s'
+	GravatarUrl = 'http://www.gravatar.com/avatar/%s?d=http%%3A%%2F%%2Fassets.github.com%%2Fimages%%2Fgravatars%%2Fgravatar-user-420.png'
 	EmoticonUrl = 'http://assets.github.com/images/icons/emoji/%s.png'
 
 	def Marker.schema
