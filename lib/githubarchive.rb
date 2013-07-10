@@ -48,6 +48,9 @@ module GitHubArchive
 	# Errors that parser cannot continue but continue parsing other events
 	class EventParseIgnorableError < StandardError; end
 
+	# Errors that parser needs fixed
+	class EventParseFixableError < StandardError; end
+
 	# Errors that worth retrying after a short wait
 	class EventParseRetryableError < StandardError; end
 
@@ -162,6 +165,10 @@ module GitHubArchive
 			begin
 				api_query.read_and_parse
 				yield Event.new(api_query.timestamp, api_query.comment, api_query.location, api_query.html_url, api_query.type, api_query.avatar)
+			rescue GitHubApi::ParseError => e
+				raise EventParseFixableError.new(e.message)
+			rescue GitHubApi::ReadError => e
+				raise EventParseIgnorableError.new(e.message)
 			rescue OpenURI::HTTPError => e
 				message = "#{e.message} (#{e.class}) for #{api_query.json_url} from #{api_query.type}"
 				case e.message[0..2]

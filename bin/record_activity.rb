@@ -62,6 +62,19 @@ def random_wait(seconds)
 	sleep((rand + 0.5) * seconds)
 end
 
+class Exception
+	# string that looks like Ruby's own error display
+	# http://route477.net/d/?date=20060925#p02
+	def detail
+		r = "#{self.message} (#{self.class})"
+		if self.backtrace
+			bt = self.backtrace.dup
+			r = "#{bt.shift}: #{r}\n#{bt.map{|l| "\tfrom #{l}"}.join("\n")}"
+		end
+		return r + "\n"
+	end
+end
+
 class GiveUp < StandardError; end
 
 class Configuration < ConfigurationBase
@@ -157,7 +170,10 @@ begin
 				processed_events += 1
 			end
 		rescue GitHubArchive::EventParseIgnorableError => e
-			#print_error($log, e, "moving onto next entry")
+			print_error($log, e, "moving onto next entry")
+		rescue GitHubArchive::EventParseFixableError => e
+			$stderr.puts e.detail
+			print_error($log, e, "moving onto next entry")
 		rescue GitHubArchive::EventParseRetryableError => e
 			current_retry += 1
 			if current_retry < max_retry

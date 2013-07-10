@@ -28,6 +28,12 @@ require 'yajl'
 # APIs referred from
 # http://developer.github.com/v3/activity/events/types/
 module GitHubApi
+	# Error from JSON parser - code needs fixed
+	class ParseError < StandardError; end
+
+	# Error from reading JSON - impossible to fix
+	class ReadError < StandardError; end
+
 	class Base
 		HOST = 'https://api.github.com'
 		VERSION = '0.0.0'
@@ -52,7 +58,15 @@ module GitHubApi
 		end
 
 		def read_and_parse
-			@js = Yajl::Parser.parse(open(@json_url, 'User-Agent' => AGENT, :http_basic_authentication => @auth).read)
+			begin
+				@js = Yajl::Parser.parse(open(@json_url, 'User-Agent' => AGENT, :http_basic_authentication => @auth).read)
+			rescue EOFError, Zlib::BufError => e
+				message = "#{e.message} (#{e.class}) for #{@json_url} as #{self.class}"
+				raise ReadError.new(message)
+			rescue Yajl::ParseError => e
+				message = "#{e.message} (#{e.class}) for #{@json_url} as #{self.class}"
+				raise ParseError.new(message)
+			end
 			@timestamp = Time.parse(@js['created_at']) if @js['created_at']
 		end
 	end
