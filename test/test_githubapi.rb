@@ -23,6 +23,8 @@
 #
 
 require 'test/unit'
+require 'zlib'
+
 $:.unshift(File.join(File.dirname(__FILE__), '..', 'test'))
 require 'datapath_helper'
 
@@ -71,5 +73,10 @@ class TestCommit < Test::Unit::TestCase
 	def test_json_url
 		t = Commit.new('zunda', 'test', '1')
 		assert_equal("#{Base::HOST}/repos/zunda/test/commits/1", t.json_url)
+	end
+
+	def test_parse
+		t = Base.new(File.join(File.dirname(__FILE__), 'sample-json/382ef451cee512f798c624d51b5fd372670f2063.json'))
+		assert_nothing_raised{t.read_and_parse}
 	end
 end
