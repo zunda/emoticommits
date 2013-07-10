@@ -64,7 +64,7 @@ class TestMarker < Test::Unit::TestCase
 		assert_equal(false, marker.emotion)
 		assert_equal(sample_location.lat, marker.lat)
 		assert_equal(sample_location.lng, marker.lng)
-		assert_equal('http://www.gravatar.com/avatar/' + sample_usual_event.gravatar_id, marker.icon)
+		assert_equal(Marker::GravatarUrl % sample_usual_event.gravatar_id, marker.icon)
 		assert_equal(sample_usual_event.url, marker.url)
 	end
 
@@ -101,7 +101,7 @@ class TestMarkers < Test::Unit::TestCase
 		assert_equal(false, js[0]['emotion'])
 		assert_equal(sample_location.lat, js[0]['lat'])
 		assert_equal(sample_location.lng, js[0]['lng'])
-		assert_equal('http://www.gravatar.com/avatar/' + sample_usual_event.gravatar_id, js[0]['icon'])
+		assert_equal(Marker::GravatarUrl % sample_usual_event.gravatar_id, js[0]['icon'])
 		assert_equal(sample_usual_event.url, js[0]['url'])
 		assert_equal(sample_emotional_event.timestamp, Time.parse(js[1]['time']))
 		assert_equal(true, js[1]['emotion'])
