@@ -166,9 +166,9 @@ module GitHubArchive
 				api_query.read_and_parse
 				yield Event.new(api_query.timestamp, api_query.comment, api_query.location, api_query.html_url, api_query.type, api_query.avatar)
 			rescue GitHubApi::ParseError => e
-				raise EventParseFixableError.new(e.message)
+				raise EventParseRetryableError.new(e.message)
 			rescue GitHubApi::ReadError => e
-				raise EventParseIgnorableError.new(e.message)
+				raise EventParseRetryableError.new(e.message)
 			rescue OpenURI::HTTPError => e
 				message = "#{e.message} (#{e.class}) for #{api_query.json_url} from #{api_query.type}"
 				case e.message[0..2]
