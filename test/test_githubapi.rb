@@ -33,11 +33,25 @@ require 'githubapi'
 
 include GitHubApi
 
+class StubFile; end
+
 class TestApi < Test::Unit::TestCase
 	def test_timestamp
 		t = Base.new(datapath('SingleCommitComment.json'))
 		t.read_and_parse
 		assert_equal(Time.utc(2013,4,12,18,1,44), t.timestamp)
+	end
+
+	def test_econnreset
+		t = Base.new(datapath('SingleCommitComment.json'))
+		def t.open(*args)
+			x = StubFile.new
+			def x.read(*args)
+				raise Errno::ECONNRESET
+			end
+			return x
+		end
+		assert_raises(ReadError){t.read_and_parse}
 	end
 end
 
