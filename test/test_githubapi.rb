@@ -76,7 +76,7 @@ class TestCommit < Test::Unit::TestCase
 	end
 
 	def test_parse
-		t = Base.new(File.join(File.dirname(__FILE__), 'sample-json/382ef451cee512f798c624d51b5fd372670f2063.json'))
+		t = Base.new(datapath('382ef451cee512f798c624d51b5fd372670f2063.json'))
 		assert_nothing_raised{t.read_and_parse}
 	end
 end
