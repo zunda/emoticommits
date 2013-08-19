@@ -53,6 +53,18 @@ class TestApi < Test::Unit::TestCase
 		end
 		assert_raises(ReadError){t.read_and_parse}
 	end
+
+	def test_readtimeout
+		t = Base.new(datapath('SingleCommitComment.json'))
+		def t.open(*args)
+			x = StubFile.new
+			def x.read(*args)
+				raise Net::ReadTimeout
+			end
+			return x
+		end
+		assert_raises(ReadError){t.read_and_parse}
+	end
 end
 
 class TestSingleCommitComment < Test::Unit::TestCase
