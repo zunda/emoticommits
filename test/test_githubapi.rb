@@ -24,6 +24,7 @@
 
 require 'test/unit'
 require 'zlib'
+require 'net/http'	# for Net::ReadTimeout
 
 $:.unshift(File.join(File.dirname(__FILE__), '..', 'test'))
 require 'datapath_helper'
@@ -60,6 +61,18 @@ class TestApi < Test::Unit::TestCase
 			x = StubFile.new
 			def x.read(*args)
 				raise Net::ReadTimeout
+			end
+			return x
+		end
+		assert_raises(ReadError){t.read_and_parse}
+	end
+
+	def test_dataerror
+		t = Base.new(datapath('SingleCommitComment.json'))
+		def t.open(*args)
+			x = StubFile.new
+			def x.read(*args)
+				raise Zlib::DataError
 			end
 			return x
 		end
