@@ -60,7 +60,7 @@ module GitHubApi
 		def read_and_parse
 			begin
 				@js = Yajl::Parser.parse(open(@json_url, 'User-Agent' => AGENT, :http_basic_authentication => @auth).read)
-			rescue EOFError, Zlib::BufError, Errno::ECONNRESET, Net::ReadTimeout => e
+			rescue EOFError, Zlib::BufError, Errno::ECONNRESET, Net::ReadTimeout, Zlib::DataError => e
 				message = "#{e.message} (#{e.class}) for #{@json_url} as #{self.class}"
 				raise ReadError.new(message)
 			rescue Yajl::ParseError => e
