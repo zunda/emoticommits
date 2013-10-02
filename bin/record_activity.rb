@@ -155,7 +155,7 @@ begin
 				processed_events += 1
 			end
 		rescue GitHubArchive::EventParseIgnorableError => e
-			print_error($log, e, "moving onto next entry") unless e.message[0..2] == '404'
+			print_error($log, e, "moving onto next entry")
 		end
 	end
 
