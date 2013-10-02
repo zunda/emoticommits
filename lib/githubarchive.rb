@@ -127,7 +127,11 @@ module GitHubArchive
 			when 'PublicEvent'
 				return	# emotions, if there are, are not from the event
 			when 'PullRequestEvent'
-				c = GitHubApi::SinglePullRequest.new(js['repository']['owner'], js['repository']['name'], js['payload']['number'], auth: @auth)
+				begin
+					c = GitHubApi::SinglePullRequest.new(js['repository']['owner'], js['repository']['name'], js['payload']['number'], auth: @auth)
+				rescue NoMethodError => e	# undefined method `[]' for nil:NilClass
+					raise EventParseIgnorableError.new(e.message)
+				end
 				c.timestamp = Time.parse(js['created_at'])	# Some PullRequests don't have created_at property
 				c.location = loc
 				c.type = type

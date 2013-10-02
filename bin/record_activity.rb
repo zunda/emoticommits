@@ -148,10 +148,14 @@ begin
 	# First parse information within JSON from GitHub Archive
 	print_message($log, "Parsing #{json_url}")
 	Yajl::Parser.parse(js) do |entry|
-		parser.parse(entry) do |event|
-			eventdb.insert('events', event)
-			locations << event.location
-			processed_events += 1
+		begin
+			parser.parse(entry) do |event|
+				eventdb.insert('events', event)
+				locations << event.location
+				processed_events += 1
+			end
+		rescue GitHubArchive::EventParseIgnorableError => e
+			print_error($log, e, "moving onto next entry") unless e.message[0..2] == '404'
 		end
 	end
 
