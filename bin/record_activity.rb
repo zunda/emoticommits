@@ -128,7 +128,7 @@ rescue OpenURI::HTTPError => e
 rescue SocketError, Errno::ENETUNREACH => e	# Temporary failure in name resolution
 	current_retry += 1
 	if current_retry < max_retry
-		print_error($log, w, "retrying in about 300 seconds (#{current_retry})")
+		print_error($log, e, "retrying in about 300 seconds (#{current_retry})")
 		random_wait(300)
 		print_message($log, "resuming ...")
 		retry
