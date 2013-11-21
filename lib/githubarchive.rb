@@ -81,7 +81,11 @@ module GitHubArchive
 			c = nil
 			case type
 			when 'CommitCommentEvent'
-				c = GitHubApi::SingleCommitComment.new(js['repository']['owner'], js['repository']['name'], js['payload']['comment_id'], auth: @auth)
+				begin
+					c = GitHubApi::SingleCommitComment.new(js['repository']['owner'], js['repository']['name'], js['payload']['comment_id'], auth: @auth)
+				rescue NoMethodError => e	# undefined method `[]' for nil:NilClass
+					raise EventParseIgnorableError.new(e.message)
+				end
 				c.location = loc
 				c.type = type
 				c.avatar = avatar
