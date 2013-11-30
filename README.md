@@ -32,6 +32,15 @@ When you fork:fork_and_knife: the repository, please kindly change the API key f
 
 To automatically create and update JSON files to be posted to the GitHub pages, a working copy of the ```gh-pages``` branch should be checked out and the path to that copy should be set to the command line argument for [create_markers.rb](bin/create_markers.rb) in [crontab](etc/crontab). While normal operations, progress of the processes are logged with ```Syslog::Logger#info``` presumably to /var/log/messages. A passphraseless SSH key maybe needed to automtically push to GitHub pages.
 
+Alternatively, ```git-new-workdir``` may be used to check out ```gh-pages``` branch as well as trunk to improve code:
+
+```
+$ cd to-working-copy
+$ sh /usr/share/doc/git-core/contrib/workdir/git-new-workdir . ../emoticommits-gh-pages
+$ cd ../emoticommits-gh-pages
+$ git checkout gh-pages
+```
+
 License
 -------
 Please see the [LICENSE file](LICENSE.md).
