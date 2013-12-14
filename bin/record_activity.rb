@@ -125,7 +125,8 @@ rescue OpenURI::HTTPError => e
 		end
 	end
 	print_error($log, e, "Giving up")	# leave js nil
-rescue SocketError, Errno::ENETUNREACH => e	# Temporary failure in name resolution
+rescue SocketError, Errno::ENETUNREACH, Net::ReadTimeout => e
+	# Errno::ENETUNREACH: Temporary failure in name resolution
 	current_retry += 1
 	if current_retry < max_retry
 		print_error($log, e, "retrying in about 300 seconds (#{current_retry})")
