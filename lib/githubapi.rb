@@ -36,7 +36,7 @@ module GitHubApi
 
 	class Base
 		HOST = 'https://api.github.com'
-		VERSION = '0.0.0'
+		VERSION = '0.1.0'
 		AGENT = "zundan@gmail.com - GitHubApi - #{VERSION}"
 
 		attr_reader :json_url
