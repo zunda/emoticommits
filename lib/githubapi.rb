@@ -36,8 +36,9 @@ module GitHubApi
 
 	class Base
 		HOST = 'https://api.github.com'
-		VERSION = '0.1.0'
+		VERSION = '0.2.0'
 		AGENT = "zundan@gmail.com - GitHubApi - #{VERSION}"
+		ACCEPT = "application/vnd.github.v3+json"	# http://developer.github.com/v3/media/#beta-v3-and-the-future
 
 		attr_reader :json_url
 		attr_reader :js
@@ -59,7 +60,7 @@ module GitHubApi
 
 		def read_and_parse
 			begin
-				@js = Yajl::Parser.parse(open(@json_url, 'User-Agent' => AGENT, :http_basic_authentication => @auth).read)
+				@js = Yajl::Parser.parse(open(@json_url, 'User-Agent' => AGENT, :http_basic_authentication => @auth, 'Accept' => ACCEPT).read)
 			rescue EOFError, Zlib::BufError, Errno::ECONNRESET, Net::ReadTimeout, Zlib::DataError => e
 				message = "#{e.message} (#{e.class}) for #{@json_url} as #{self.class}"
 				raise ReadError.new(message)
