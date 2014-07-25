@@ -7,7 +7,8 @@
 # git://github.com/arvida/emoji-cheat-sheet.com.git
 #
 # You might want to
-# $ git submodule update
+# $ cd emoji-cheat-sheet
+# $ git pull origin master
 # to sync with the upstream
 #
 #
