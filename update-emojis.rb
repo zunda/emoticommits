@@ -6,6 +6,10 @@
 # which should be an updated clone of
 # git://github.com/arvida/emoji-cheat-sheet.com.git
 #
+# You might want to
+# $ git submodule update
+# to sync with the upstream
+#
 #
 # Copyright (c) 2013 zunda <zunda at freeshell.org>
 #
