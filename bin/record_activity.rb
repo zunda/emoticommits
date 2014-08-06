@@ -199,6 +199,9 @@ begin
 				print_error($log, e, "Giving up (#{current_retry})")
 				raise GiveUp
 			end
+		rescue SQLite3::BusyException
+			$log.error(e.message + " - giving up and recording incomplete data")
+			raise GiveUp
 		end
 		if time_limit < Time.now
 			print_message($log, "Time out for querying GitHub API. #{"%.0f" % (100.0 * i_query / total_query)}% complete")
@@ -214,14 +217,18 @@ print_message($log, "Querying locations")
 
 maxquery = 100
 queries = 0
-locations.shuffle.each do |address|
-	if locationdb.select('COUNT(*) FROM locations WHERE (status = "OK" or status = "ZERO_RESULTS") and address = ?', address)[0][0] < 1
-		location = GoogleApi::Geocoding.query(address)
-		locationdb.insert('locations', location)
-		queries += 1
+begin
+	locations.shuffle.each do |address|
+		if locationdb.select('COUNT(*) FROM locations WHERE (status = "OK" or status = "ZERO_RESULTS") and address = ?', address)[0][0] < 1
+			location = GoogleApi::Geocoding.query(address)
+			locationdb.insert('locations', location)
+			queries += 1
+		end
+		processed_addresses += 1
+		break if queries >= maxquery
 	end
-	processed_addresses += 1
-	break if queries >= maxquery
+rescue SQLite3::BusyException
+	$log.error(e.message + " - giving up and recording incomplete data")
 end
 locationdb.close
 

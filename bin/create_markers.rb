@@ -46,22 +46,29 @@ $log = Syslog::Logger.new("#{File.basename($0, '.rb')}-#{t0.strftime("%H%M%S")}"
 	t2 = t1 +  3600
 	$log.info("Listing markers for #{t1} - #{t2}")
 
-	events = Array.new
-	eventdb.retrieve('events', GitHubArchive::Event, 'WHERE ? <= timestamp AND timestamp < ?', t1.to_i, t2.to_i).each do |event|
-		events << event
-	end
+	begin
+		events = Array.new
+		eventdb.retrieve('events', GitHubArchive::Event, 'WHERE ? <= timestamp AND timestamp < ?', t1.to_i, t2.to_i).each do |event|
+			events << event
+		end
 
-	markers = Markers.new
-	events.each do |event|
-		location = locationdb.retrieve('locations', GoogleApi::Geocoding, 'WHERE address=?', event.location)[0]
-		if location and location.status == 'OK'
-			begin
-				markers << Marker.new(event, location)
-			rescue Emoji::Error => e
-				$log.error(e.message + " - ignoring")
+		markers = Markers.new
+		events.each do |event|
+			location = locationdb.retrieve('locations', GoogleApi::Geocoding, 'WHERE address=?', event.location)[0]
+			if location and location.status == 'OK'
+				begin
+					markers << Marker.new(event, location)
+				rescue Emoji::Error => e
+					$log.error(e.message + " - ignoring")
+				end
 			end
 		end
+	rescue SQLite3::BusyException
+		$log.error(e.message + " - giving up and recording incomplete data")
 	end
+
+	evendb.close
+	locationdb.close
 
 	dstpath = File.join(dstdir, t1.utc.strftime("%Y%m%d%H.json"))
 	File.open(dstpath, 'w') do |f|
