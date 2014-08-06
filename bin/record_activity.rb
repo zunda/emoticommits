@@ -157,6 +157,9 @@ begin
 			end
 		rescue GitHubArchive::EventParseIgnorableError => e
 			print_error($log, e, "moving onto next entry")
+		rescue SQLite3::BusyException => e
+			print_error($log, e, "giving up and recording incomplete data")
+			raise GiveUp
 		end
 	end
 
