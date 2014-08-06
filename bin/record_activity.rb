@@ -199,7 +199,7 @@ begin
 				print_error($log, e, "Giving up (#{current_retry})")
 				raise GiveUp
 			end
-		rescue SQLite3::BusyException
+		rescue SQLite3::BusyException => e
 			$log.error(e.message + " - giving up and recording incomplete data")
 			raise GiveUp
 		end
@@ -227,7 +227,7 @@ begin
 		processed_addresses += 1
 		break if queries >= maxquery
 	end
-rescue SQLite3::BusyException
+rescue SQLite3::BusyException => e
 	$log.error(e.message + " - giving up and recording incomplete data")
 end
 locationdb.close

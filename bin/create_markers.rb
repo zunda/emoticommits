@@ -63,7 +63,7 @@ $log = Syslog::Logger.new("#{File.basename($0, '.rb')}-#{t0.strftime("%H%M%S")}"
 				end
 			end
 		end
-	rescue SQLite3::BusyException
+	rescue SQLite3::BusyException => e
 		$log.error(e.message + " - giving up and recording incomplete data")
 	end
 
