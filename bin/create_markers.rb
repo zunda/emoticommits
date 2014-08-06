@@ -67,7 +67,7 @@ $log = Syslog::Logger.new("#{File.basename($0, '.rb')}-#{t0.strftime("%H%M%S")}"
 		$log.error(e.message + " - giving up and recording incomplete data")
 	end
 
-	evendb.close
+	eventdb.close
 	locationdb.close
 
 	dstpath = File.join(dstdir, t1.utc.strftime("%Y%m%d%H.json"))
