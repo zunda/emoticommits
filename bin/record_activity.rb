@@ -203,7 +203,7 @@ begin
 				raise GiveUp
 			end
 		rescue SQLite3::BusyException => e
-			$log.error(e.message + " - giving up and recording incomplete data")
+			print_error($log, e, "giving up and recording incomplete data")
 			raise GiveUp
 		end
 		if time_limit < Time.now
@@ -231,7 +231,7 @@ begin
 		break if queries >= maxquery
 	end
 rescue SQLite3::BusyException => e
-	$log.error(e.message + " - giving up and recording incomplete data")
+	print_error($log, e, "giving up and recording incomplete data")
 end
 locationdb.close
 
