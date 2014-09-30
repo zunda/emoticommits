@@ -58,7 +58,7 @@ module GoogleApi
 			max_retry = 3
 			begin
 				@js = Yajl::Parser.parse(open(uri || @uri, 'User-Agent' => AGENT).read)
-			rescue SocketError, Errno::ENETUNREACH => e
+			rescue SocketError, Errno::ENETUNREACH, OpenURI::HTTPError => e
 				if current_retry < max_retry
 					current_retry += 1
 					sleep(600)
