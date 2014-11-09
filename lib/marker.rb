@@ -42,7 +42,7 @@ class Marker
 		# http://geojson.org/geojson-spec.html
 		props = {:time => @time.iso8601, :emotion => @emotion, :icon => @icon, :url => @url}
 		Yajl::Encoder.encode(
-			{:type => 'Point', :coordinates => [@lat, @lng], :properties => props},
+			{:type => 'Point', :coordinates => [@lng, @lat], :properties => props},
 			args, block)
 	end
 
