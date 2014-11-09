@@ -39,8 +39,11 @@ class Marker
 	include Schemable
 
 	def to_json(*args, &block)
-		hash = {:time => @time.iso8601, :emotion => @emotion, :lat => @lat, :lng => @lng, :icon => @icon, :url => @url}
-		Yajl::Encoder.encode(hash, args, block)
+		# http://geojson.org/geojson-spec.html
+		props = {:time => @time.iso8601, :emotion => @emotion, :icon => @icon, :url => @url}
+		Yajl::Encoder.encode(
+			{:type => 'Point', :coordinates => [@lat, @lng], :properties => props},
+			args, block)
 	end
 
 	def initialize(event = nil, geocoding = nil)
@@ -61,6 +64,9 @@ end
 
 class Markers < Array
 	def to_json(*args, &block)
-		Yajl::Encoder.encode(self.sort_by{|x| x.time}, args, block)
+		# http://geojson.org/geojson-spec.html
+		Yajl::Encoder.encode(
+			{:type => 'GeometryCollection', :geometries => self.sort_by{|x| x.time}},
+			args, block)
 	end
 end
