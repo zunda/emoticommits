@@ -51,12 +51,12 @@ MarkerQueue.load = function(basename, page_time) {
   http.onreadystatechange = function() {
     if ((http.readyState == 4) && (http.status == 200)) {
       var loaded = JSON.parse(http.responseText).filter(function(marker) {
-        return (page_time < new Date(marker.time));
+        return (page_time < new Date(marker.properties.time));
       });
       if (loaded.length > 0) {
         MarkerQueue.loading = true;
         if (MarkerQueue.queue.length < 1 ||
-          MarkerQueue.queue[MarkerQueue.queue.length - 1].time < loaded[0].time) {
+          MarkerQueue.queue[MarkerQueue.queue.length - 1].properties.time < loaded[0].properties.time) {
           // Normal sequence in loading markers
           MarkerQueue.queue = MarkerQueue.queue.concat(loaded);
         } else {
@@ -73,14 +73,14 @@ MarkerQueue.add = function(page_time, wall_time, conf, mapwindow) {
   if (! MarkerQueue.loading) {
     while(
       MarkerQueue.queue.length > 0 &&
-      new Date(MarkerQueue.queue[0].time) < page_time
+      new Date(MarkerQueue.queue[0].properties.time) < page_time
     ) {
       var marker = MarkerQueue.queue.shift();
-      var icon = marker.icon;
+      var icon = marker.properties.icon;
       var size;
       var until;
       var index;
-      if (marker.emotion) {
+      if (marker.properties.emotion) {
         size = conf.emoticon.size;
         until = new Date(wall_time.getTime() + conf.emoticon.duration);
         index = MarkerQueue.zIndex + 1000;
@@ -91,9 +91,9 @@ MarkerQueue.add = function(page_time, wall_time, conf, mapwindow) {
         index = MarkerQueue.zIndex;
       };
       var pin = mapwindow.dropPin(
-        marker.lat, marker.lng, icon, size, marker.url, index);
+        marker.coordinates[1], marker.coordinates[0], icon, size, marker.properties.url, index);
       MarkerQueue.zIndex += 1;
-      if (marker.emotion) {
+      if (marker.properties.emotion) {
         MarkerQueue.emoticons.push({until: until, marker: pin});
       } else {
         MarkerQueue.avatars.push({until: until, marker: pin});
