@@ -70,6 +70,10 @@
     function initialize() {
       mapwindow = document.getElementById("mapframe").contentWindow;
       changeOffset();
+			// -- to test reding GeoJSON
+			page_time = new Date("2014-11-09T01:00:00-10:00");
+			time_offset = new Date().getTime() - page_time;
+			// --
       mapwindow.onViewChanged(function(){
         document.getElementById("zoom_back").disabled = false;
       });
