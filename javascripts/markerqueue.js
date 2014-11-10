@@ -50,21 +50,25 @@ MarkerQueue.load = function(basename, page_time) {
   http.send(null);
   http.onreadystatechange = function() {
     if ((http.readyState == 4) && (http.status == 200)) {
-      var loaded = JSON.parse(http.responseText).filter(function(marker) {
-        return (page_time < new Date(marker.properties.time));
-      });
-      if (loaded.length > 0) {
-        MarkerQueue.loading = true;
-        if (MarkerQueue.queue.length < 1 ||
-          MarkerQueue.queue[MarkerQueue.queue.length - 1].properties.time < loaded[0].properties.time) {
-          // Normal sequence in loading markers
-          MarkerQueue.queue = MarkerQueue.queue.concat(loaded);
-        } else {
-          // Sometimes old markers come after new markers
-          MarkerQueue.queue = loaded.concat(MarkerQueue.queue);
-        };
-        MarkerQueue.loading = false;
-      };
+			var parsed = JSON.parse(http.responseText);
+			if (parsed.type == 'GeometryCollection' && typeof parsed.geometries !== 'undefined') {
+				var loaded = parsed.geometries.filter(
+					function(marker) {
+						return (page_time < new Date(marker.properties.time));
+				});
+				if (loaded.length > 0) {
+					MarkerQueue.loading = true;
+					if (MarkerQueue.queue.length < 1 ||
+						MarkerQueue.queue[MarkerQueue.queue.length - 1].properties.time < loaded[0].properties.time) {
+						// Normal sequence in loading markers
+						MarkerQueue.queue = MarkerQueue.queue.concat(loaded);
+					} else {
+						// Sometimes old markers come after new markers
+						MarkerQueue.queue = loaded.concat(MarkerQueue.queue);
+					};
+					MarkerQueue.loading = false;
+				};
+			};
     };
   };
 };
